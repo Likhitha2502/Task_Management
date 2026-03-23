@@ -1,0 +1,18 @@
+package com.focusflow.service;
+
+import com.focusflow.dto.*;
+
+import java.util.Map;
+
+public interface AuthService {
+
+    Map<String, Object> register(RegisterRequest request);
+
+    Map<String, Object> login(LoginRequest request);
+
+    Map<String, Object> forgotPassword(ForgotPasswordRequest request);
+
+    ProfileResponse getProfile(String email);
+
+    Map<String, Object> updateProfile(String email, UpdateProfileRequest request);
+}
