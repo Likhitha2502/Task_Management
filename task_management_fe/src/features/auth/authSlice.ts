@@ -1,80 +1,167 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ajax } from 'rxjs/ajax';
-import { map, mergeMap, catchError } from 'rxjs/operators';
-import { ofType, combineEpics } from 'redux-observable';
-import { of } from 'rxjs';
-import { jwtService } from '../services/jwt';
+import { RootState } from '@/app/store';
+import { User, RegisterPayload, RequestStatus, LoginPayload } from '@/models';
+import { createDraftSafeSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// Define the State
-interface AuthState {
-  user: any | null;
+import { combineEpics, Epic, ofType } from 'redux-observable';
+import { from, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+
+import http from '../../services/http';
+
+export interface AuthState {
+  currentUser: User | null;
+  isAuthorized: boolean | null;
+  register: boolean;
+  loading: boolean;
   accessToken: string | null;
-  isLoading: boolean;
   error: string | null;
+  statuses: {
+    login: RequestStatus;
+    logout: RequestStatus;
+  };
 }
 
 const initialState: AuthState = {
-  user: null,
-  accessToken: jwtService.getToken(),
-  isLoading: false,
+  currentUser: null,
+  isAuthorized: false,
+  register: false,
+  loading: false,
+  accessToken: null,
   error: null,
+  statuses: {
+    login: RequestStatus.Idle,
+    logout: RequestStatus.Idle,
+  },
 };
 
-// --- THE SLICE ---
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // 1. Trigger Action (Called from UI)
-    loginRequest: (state, _action: PayloadAction<any>) => {
-      state.isLoading = true;
+    // ── Register ──────────────────────────────────────────────────────────────
+    registerRequest(state, action: PayloadAction<RegisterPayload>) {
+      state.register = true;
       state.error = null;
     },
-    // 2. Success Action (Called by Epic)
-    loginSuccess: (state, action: PayloadAction<any>) => {
-      state.isLoading = false;
-      state.accessToken = action.payload.accessToken;
-      state.user = action.payload.user;
-      // Side effect: Save to local storage
-      if (action.payload.accessToken) {
-        jwtService.saveToken(action.payload.accessToken);
-      }
+    registerSuccess(state, action: PayloadAction<User>) {
+      state.register = false;
+      state.currentUser = action.payload;
+      state.error = null;
     },
-    // 3. Failure Action (Called by Epic)
-    loginFailure: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
+    registerFailure(state, action: PayloadAction<string>) {
+      state.register = false;
       state.error = action.payload;
     },
-    logout: (state) => {
-      jwtService.removeToken();
-      state.user = null;
-      state.accessToken = null;
-    }
-  }
+
+    loginRequest(state, action: PayloadAction<LoginPayload>) {
+      state.isAuthorized = null;
+      //state.accessToken = null;
+      state.error = null;
+      state.statuses.login = RequestStatus.Pending;
+    },
+    loginSuccess(state, action: PayloadAction<User>) {
+      // if (action.accesstoken) {
+      // state.isAuthorized = true;
+      // }
+      state.currentUser = action.payload;
+      state.statuses.login = RequestStatus.Success;
+      state.error = null;
+    },
+    loginFailure(state, action: PayloadAction<string>) {
+      state.error = action.payload;
+      state.statuses.login = RequestStatus.Failure;
+    },
+
+    // ── Logout ────────────────────────────────────────────────────────────────
+    logout(state) {
+      state.currentUser = null;
+      state.error = null;
+      state.statuses.logout = RequestStatus.Idle;
+    },
+
+    // ── Reset error/status ────────────────────────────────────────────────────
+    clearError(state) {
+      state.error = null;
+    },
+  },
 });
 
-export const { loginRequest, loginSuccess, loginFailure, logout } = authSlice.actions;
+export const {
+  registerRequest,
+  registerSuccess,
+  registerFailure,
+  loginRequest,
+  loginSuccess,
+  loginFailure,
+  logout,
+  clearError,
+} = authSlice.actions;
 
-// --- THE EPIC (The Ajax Logic) ---
-export const loginEpic = (action$: any) => action$.pipe(
-  ofType(loginRequest.type),
-  mergeMap((action: any) =>
-    ajax({
-      url: 'http://localhost:8080/api/auth/login', // Use your api.ts variable here later
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: action.payload
-    }).pipe(
-      map(response => loginSuccess(response.response)),
-      catchError(error => {
-        const message = error.response?.message || 'Login failed. Please check your credentials.';
-        return of(loginFailure(message));
-      })
-    )
-  )
-);
-
-// Combine all epics in this file (if you add more like signupEpic)
-export const authEpics = combineEpics(loginEpic);
+export const authSliceActions = authSlice.actions;
 
 export default authSlice.reducer;
+
+const selectAuthState = (state: RootState): AuthState => state.auth;
+
+export const selectors = {
+  isRegisterLoading: createDraftSafeSelector(selectAuthState, state => state.register),
+  isAuthorized: createDraftSafeSelector(selectAuthState, (auth) => auth.isAuthorized),
+  isLoginSuccess: createDraftSafeSelector(selectAuthState, (auth) => auth.statuses.login === RequestStatus.Success),
+  isError: createDraftSafeSelector(selectAuthState, state => state.error),
+  getCurrentUser: createDraftSafeSelector(selectAuthState, (auth) => auth.currentUser),
+};
+
+export const registerEpic: Epic = (action$) =>
+  action$.pipe(
+    ofType(registerRequest.type),
+    switchMap((action: { type: string; payload: RegisterPayload }) =>
+      from(
+        http.post<User>('/auth/register', action.payload)
+      ).pipe(
+        map((response) => {
+          const user = response.data;
+
+          // Persist JWT so http interceptor attaches it to future requests
+          //commented unmtil BE modified for token
+          // if (user.token) {
+          //   jwtService.setToken(user.token);
+          // }
+
+          return registerSuccess(user);
+        }),
+        catchError((error) => {
+          // Handles both Axios errors and Spring Boot error responses
+          const message =
+            error?.response?.data?.message ||
+            error?.response?.data ||
+            error?.message ||
+            'Registration failed. Please try again.';
+
+          return of(registerFailure(String(message)));
+        })
+      )
+    )
+  );
+const loginEpic: Epic = (action$) =>
+  action$.pipe(
+    ofType(loginRequest.type),
+    switchMap((action: { type: string; payload: LoginPayload }) =>
+      from(http.post<User>('/auth/login', action.payload)).pipe(
+        map((response) => {
+          const user = response.data;
+          // if (user.token) jwtService.setToken(user.token); // uncomment when BE adds token
+          return loginSuccess(user);
+        }),
+        catchError((error) => {
+          const message =
+            error?.response?.data?.message ||
+            error?.response?.data ||
+            error?.message ||
+            'Login failed. Please check your credentials.';
+          return of(loginFailure(String(message)));
+        })
+      )
+    )
+  );
+// Combine all epics in this file (if you add more like signupEpic)
+export const authEpics = combineEpics(registerEpic, loginEpic);
