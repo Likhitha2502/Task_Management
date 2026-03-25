@@ -15,4 +15,6 @@ public interface AuthService {
     ProfileResponse getProfile(String email);
 
     Map<String, Object> updateProfile(String email, UpdateProfileRequest request);
+
+    Map<String, Object> resetPassword(ResetPasswordRequest request);
 }

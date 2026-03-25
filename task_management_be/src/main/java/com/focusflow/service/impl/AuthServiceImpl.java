@@ -123,4 +123,22 @@ public class AuthServiceImpl implements AuthService {
 
         return sb.toString();
     }
+
+    @Override
+    public Map<String, Object> resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new UnauthorizedException("Invalid current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Password reset successful");
+        response.put("email", user.getEmail());
+        return response;
+    }
 }
