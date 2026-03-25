@@ -1,6 +1,7 @@
 package com.focusflow.controller;
 
 import com.focusflow.dto.ProfileResponse;
+import com.focusflow.dto.ResetPasswordRequest;
 import com.focusflow.dto.UpdateProfileRequest;
 import com.focusflow.service.AuthService;
 import org.springframework.web.bind.annotation.*;
@@ -26,5 +27,10 @@ public class ProfileController {
     public Map<String, Object> updateProfile(@RequestParam String email,
                                              @RequestBody UpdateProfileRequest request) {
         return authService.updateProfile(email, request);
+    }
+
+    @PutMapping("/reset-password")
+    public Map<String, Object> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return authService.resetPassword(request);
     }
 }
