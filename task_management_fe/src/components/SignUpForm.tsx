@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { labelStyle, primaryButtonStyle } from '../styles/Form.styles';
 import { useCallback, useState } from 'react';
+import { equals, isNil } from 'ramda';
 import { useSelector } from 'react-redux';
 import { boundActions } from '../app/boundActions';  // ← only import needed
 
@@ -31,8 +32,8 @@ type SignUpFormProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const SignUpForm = ({ onBackToLogin }: SignUpFormProps) => {
-  const loading = useSelector(selectors.auth.isRegisterLoading);
-  const error = useSelector(selectors.auth.isError);
+  const loading = useSelector(selectors.auth.isRegisterLoading, equals);
+  const error = useSelector(selectors.auth.isError, equals);
 
   const [form, setForm] = useState({
     firstName: '',
@@ -59,19 +60,19 @@ export const SignUpForm = ({ onBackToLogin }: SignUpFormProps) => {
 
   return (
     <Box component="form" style={{ width: '100%' }}>
-      {error && (
+      {!isNil(error) && (
         <Typography variant="body2" style={{ color: '#d32f2f', marginBottom: '12px', fontSize: '0.85rem' }}>
-          {error}
+          {error as string}
         </Typography>
       )}
 
       <GridContainer container spacing={2}>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <Typography variant="body2" style={labelStyle}>First name</Typography>
           <FormTextField fullWidth name="firstName" placeholder="First Name"
             size="small" value={form.firstName} onChange={handleChange} />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <Typography variant="body2" style={labelStyle}>Last name</Typography>
           <FormTextField fullWidth name="lastName" placeholder="Last Name"
             size="small" value={form.lastName} onChange={handleChange} />

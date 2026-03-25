@@ -1,6 +1,5 @@
-import { boundActions, selectors } from "@/app/index";
+import { boundActions } from "@/app/index";
 import { useState } from "react";
-import { useSelector } from "react-redux";
 import { styles } from "./Dashboard.styles";
 import { TaskLists } from "./TasksList";
 import { TasksProgress } from "./TaskProgress";
@@ -15,7 +14,7 @@ export const DashboardPage = () => {
     const currentUser = {
         firstName: 'user',
         lastName: 'one',
-        emailAddress: 'userone@a.com',
+        email: 'userone@a.com',
     };
     // Derive initials from username for avatar
     const initials = currentUser
@@ -104,7 +103,7 @@ export const DashboardPage = () => {
                                     <div style={styles.dropdownAvatar}>{initials}</div>
                                     <div>
                                         <p style={styles.dropdownName}>{currentUser?.firstName ?? '—'}</p>
-                                        <p style={styles.dropdownEmail}>{currentUser?.emailAddress ?? '—'}</p>
+                                        <p style={styles.dropdownEmail}>{currentUser?.email ?? '—'}</p>
                                     </div>
                                 </div>
                                 <div style={styles.dropdownDivider} />
