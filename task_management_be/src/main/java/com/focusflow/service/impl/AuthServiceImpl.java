@@ -61,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Login successful");
         response.put("email", user.getEmail());
+        response.put("requiresPasswordReset", user.getPasswordResetRequired());
         return response;
     }
 
@@ -71,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
         String tempPassword = generateTempPassword();
         user.setPassword(passwordEncoder.encode(tempPassword));
+        user.setPasswordResetRequired(true);
         userRepository.save(user);
 
         emailService.sendTemporaryPassword(user.getEmail(), tempPassword);
@@ -134,6 +136,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPasswordResetRequired(false);
         userRepository.save(user);
 
         Map<String, Object> response = new LinkedHashMap<>();
