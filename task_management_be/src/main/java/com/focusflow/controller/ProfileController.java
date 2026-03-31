@@ -5,6 +5,7 @@ import com.focusflow.dto.ResetPasswordRequest;
 import com.focusflow.dto.UpdateProfileRequest;
 import com.focusflow.service.AuthService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -18,8 +19,8 @@ public class ProfileController {
         this.authService = authService;
     }
 
-    @GetMapping
-    public ProfileResponse getProfile(@RequestParam String email) {
+    @GetMapping("/{email}")
+    public ProfileResponse getProfile(@PathVariable String email) {
         return authService.getProfile(email);
     }
 
@@ -29,8 +30,14 @@ public class ProfileController {
         return authService.updateProfile(email, request);
     }
 
-    @PutMapping("/reset-password")
-    public Map<String, Object> resetPassword(@RequestBody ResetPasswordRequest request) {
-        return authService.resetPassword(request);
+    @PostMapping("/upload-picture")
+    public Map<String, Object> uploadProfilePicture(@RequestParam String email,
+                                                    @RequestParam("file") MultipartFile file) {
+        return authService.uploadProfilePicture(email, file);
+    }
+
+    @PutMapping("/change-password")
+    public Map<String, Object> changePassword(@RequestBody ResetPasswordRequest request) {
+        return authService.changePassword(request);
     }
 }

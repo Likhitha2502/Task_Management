@@ -3,7 +3,6 @@ package com.focusflow.dto;
 public class UpdateProfileRequest {
     private String firstName;
     private String lastName;
-    private String password;
 
     public String getFirstName() {
         return firstName;
@@ -21,11 +20,4 @@ public class UpdateProfileRequest {
         this.lastName = lastName;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
