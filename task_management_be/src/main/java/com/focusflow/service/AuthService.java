@@ -1,6 +1,7 @@
 package com.focusflow.service;
 
 import com.focusflow.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -16,5 +17,7 @@ public interface AuthService {
 
     Map<String, Object> updateProfile(String email, UpdateProfileRequest request);
 
-    Map<String, Object> resetPassword(ResetPasswordRequest request);
+    Map<String, Object> changePassword(ResetPasswordRequest request);
+
+    Map<String, Object> uploadProfilePicture(String email, MultipartFile file);
 }
