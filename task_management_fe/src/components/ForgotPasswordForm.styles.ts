@@ -1,25 +1,11 @@
 import { makeStyles } from 'tss-react/mui';
 
-export const useSignUpFormStyles = makeStyles({ name: 'SignUpForm' })({
+export const useForgotPasswordFormStyles = makeStyles({ name: 'ForgotPasswordForm' })({
   form: {
     width: '100%',
   },
-  errorText: {
-    color: '#d32f2f',
-    marginBottom: '12px',
-    fontSize: '0.85rem',
-  },
-  nameRow: {
-    marginBottom: '16px',
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-  },
-  emailField: {
-    marginBottom: '16px',
-  },
-  passwordField: {
-    marginBottom: '32px',
+  emailSection: {
+    marginBottom: '24px',
   },
   label: {
     fontWeight: 'bold',
@@ -34,6 +20,14 @@ export const useSignUpFormStyles = makeStyles({ name: 'SignUpForm' })({
       borderRadius: '6px',
     },
   },
+  helperText: {
+    display: 'block',
+    marginTop: '12px',
+    color: '#666',
+    fontSize: '12px',
+    lineHeight: '1.4',
+    textAlign: 'center',
+  },
   primaryButton: {
     backgroundColor: '#D35F55',
     paddingTop: '12px',
@@ -43,10 +37,9 @@ export const useSignUpFormStyles = makeStyles({ name: 'SignUpForm' })({
     color: '#fff',
     textTransform: 'none',
   },
-  secondaryLink: {
+  secondaryButton: {
     marginTop: '16px',
     color: '#888',
     textTransform: 'none',
-    fontFamily: 'Georgia, serif',
   },
 });

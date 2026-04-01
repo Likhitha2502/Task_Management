@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import { selectors } from './app/index';
 import { ROUTES } from './constants';
+import UserProfilePage from './pages/UserProfilePage';
 
 const theme = createTheme({
   palette: {
@@ -51,8 +52,9 @@ function App() {
           <Route path={ROUTES.auth.forgot} element={<PublicRoute><LoginPage /></PublicRoute>} />
 
           {/* Protected routes — redirect to login if not authenticated */}
-          <Route path={ROUTES.tasks}   element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+          <Route path={ROUTES.tasks} element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
           <Route path={ROUTES.progress} element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+          <Route path={ROUTES.userProfile} element={<PrivateRoute><UserProfilePage /></PrivateRoute>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to={ROUTES.auth.login} replace />} />

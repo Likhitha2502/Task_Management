@@ -7,14 +7,12 @@ import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/LoginForm';
 import { SignUpForm } from '../components/SignUpForm';
 import { ForgotPasswordForm } from '../components/ForgotPasswordForm';
-import {
-  pageWrapperStyle, cardStyle, logoContainerStyle,
-  headerContainerStyle, dividerStyle
-} from './LoginPage.styles';
+import { useLoginPageStyles } from './LoginPage.styles';
 import { selectors, boundActions } from '../app/index';
 import { ROUTES } from '@/constants';
 
 const LoginPage = () => {
+  const { classes } = useLoginPageStyles();
   const [view, setView] = useState<'login' | 'signup' | 'forgot'>('login');
   const navigate = useNavigate();
   const registrationSuccess = useSelector(selectors.auth.registrationSuccess);
@@ -42,18 +40,20 @@ const LoginPage = () => {
   };
 
   return (
-    <Box style={pageWrapperStyle}>
-      <Paper style={cardStyle}>
-        <Box style={logoContainerStyle}>
-          <Avatar style={{ backgroundColor: '#D35F55', borderRadius: '12px', marginRight: '12px' }}>F</Avatar>
-          <Typography variant="h5" style={{ fontWeight: 600, fontFamily: 'Georgia, serif' }}>FocusFlow</Typography>
+    <Box className={classes.pageWrapper}>
+      <Paper className={classes.card}>
+        <Box className={classes.logoContainer}>
+          <Avatar className={classes.logoAvatar}>F</Avatar>
+          <Typography variant="h5" className={classes.logoTitleTypography}>
+            FocusFlow
+          </Typography>
         </Box>
 
-        <Box style={headerContainerStyle}>
-          <Typography variant="body1" style={{ color: '#D35F55', fontWeight: 'bold' }}>
+        <Box className={classes.headerContainer}>
+          <Typography variant="body1" className={classes.headerAccentTypography}>
             {getHeaderText()}
           </Typography>
-          <Box style={dividerStyle} />
+          <Box className={classes.divider} />
         </Box>
 
         {view === 'login' && (
@@ -66,7 +66,7 @@ const LoginPage = () => {
         {view === 'signup' && <SignUpForm onBackToLogin={() => setView('login')} />}
         {view === 'forgot' && <ForgotPasswordForm onBackToLogin={() => setView('login')} />}
 
-        <Typography variant="caption" style={{ marginTop: '32px', color: '#757575', textAlign: 'center' }}>
+        <Typography variant="caption" className={classes.footerCaption}>
           Only you can see your tasks. No shared access.
         </Typography>
       </Paper>
