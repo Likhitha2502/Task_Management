@@ -7,13 +7,20 @@ import com.focusflow.exception.UnauthorizedException;
 import com.focusflow.repository.UserRepository;
 import com.focusflow.service.AuthService;
 import com.focusflow.service.EmailService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -28,6 +35,9 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
     }
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     @Override
     public Map<String, Object> register(RegisterRequest request) {
@@ -61,47 +71,51 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Login successful");
         response.put("email", user.getEmail());
+        response.put("requiresPasswordReset", user.getPasswordResetRequired());
         return response;
     }
 
     @Override
     public Map<String, Object> forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         String tempPassword = generateTempPassword();
         user.setPassword(passwordEncoder.encode(tempPassword));
+        user.setPasswordResetRequired(true);
         userRepository.save(user);
 
         emailService.sendTemporaryPassword(user.getEmail(), tempPassword);
 
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Temporary password sent to email");
+        response.put("message", "Temporary password sent to email. Please log in using the temporary password and then reset your password.");
         response.put("email", user.getEmail());
         return response;
     }
     @Override
     public ProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         return new ProfileResponse(
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getProfilePicture()
         );
     }
 
     @Override
     public Map<String, Object> updateProfile(String email, UpdateProfileRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
+            user.setFirstName(request.getFirstName());
+        }
 
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getLastName() != null && !request.getLastName().isBlank()) {
+            user.setLastName(request.getLastName());
         }
 
         userRepository.save(user);
@@ -111,7 +125,6 @@ public class AuthServiceImpl implements AuthService {
         response.put("email", user.getEmail());
         return response;
     }
-
     private String generateTempPassword() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
         SecureRandom random = new SecureRandom();
@@ -122,5 +135,89 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public Map<String, Object> changePassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new UnauthorizedException("Invalid current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPasswordResetRequired(false);
+        userRepository.save(user);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Password changed successfully. Please log in again.");
+        response.put("email", user.getEmail());
+        response.put("forceLogout", true);
+        return response;
+    }
+
+    @Override
+    public Map<String, Object> uploadProfilePicture(String email, MultipartFile file) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        String oldProfilePicture = user.getProfilePicture();
+
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Please upload a file");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                !(contentType.equals("image/jpeg") ||
+                        contentType.equals("image/png") ||
+                        contentType.equals("image/jpg"))) {
+            throw new BadRequestException("Only JPG, JPEG, and PNG files are allowed");
+        }
+
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new BadRequestException("File size must be 5MB or less");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String fileName = UUID.randomUUID() + extension;
+
+        File directory = new File(uploadDir);
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new BadRequestException("Could not create upload directory");
+        }
+
+        File destination = new File(directory, fileName);
+
+        try {
+            file.transferTo(destination);
+        } catch (IOException e) {
+            log.error("Failed to upload profile picture for email: {}", email, e);
+            throw new BadRequestException("Failed to upload profile picture: " + e.getMessage());
+        }
+
+        // delete old profile picture if it exists
+        if (oldProfilePicture != null && !oldProfilePicture.isBlank()) {
+            File oldFile = new File(oldProfilePicture);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+        }
+
+        user.setProfilePicture(destination.getAbsolutePath());
+        userRepository.save(user);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Profile picture uploaded successfully");
+        response.put("email", user.getEmail());
+        response.put("profilePicture", user.getProfilePicture());
+        return response;
     }
 }
