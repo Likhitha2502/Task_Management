@@ -1,27 +1,14 @@
 // src/components/SignUpForm.tsx
 import {
-  Box, TextField, Button, Typography, Grid, styled,
+  Box, Button, TextField, Typography, Grid,
 } from '@mui/material';
-import { labelStyle, primaryButtonStyle } from '../styles/Form.styles';
+import { useSignUpFormStyles } from './SignUpForm.styles';
 import { useCallback, useState } from 'react';
 import { equals, isNil } from 'ramda';
 import { useSelector } from 'react-redux';
 import { boundActions } from '../app/boundActions';  // ← only import needed
 
 import { selectors } from '@/app/selectors';
-
-// ─── Styled Components ────────────────────────────────────────────────────────
-
-const GridContainer = styled(Grid)({
-  marginBottom: '16px',
-  display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'nowrap',
-});
-
-const FormTextField = styled(TextField)({
-  borderRadius: '6px',
-});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +19,7 @@ type SignUpFormProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const SignUpForm = ({ onBackToLogin }: SignUpFormProps) => {
+  const { classes } = useSignUpFormStyles();
   const loading = useSelector(selectors.auth.isRegisterLoading, equals);
   const error = useSelector(selectors.auth.isError, equals);
 
@@ -59,47 +47,47 @@ export const SignUpForm = ({ onBackToLogin }: SignUpFormProps) => {
   }, [form]);
 
   return (
-    <Box component="form" style={{ width: '100%' }}>
+    <Box component="form" className={classes.form}>
       {!isNil(error) && (
-        <Typography variant="body2" style={{ color: '#d32f2f', marginBottom: '12px', fontSize: '0.85rem' }}>
+        <Typography variant="body2" className={classes.errorText}>
           {error as string}
         </Typography>
       )}
 
-      <GridContainer container spacing={2}>
+      <Grid container spacing={2} className={classes.nameRow}>
         <Grid size={6}>
-          <Typography variant="body2" style={labelStyle}>First name</Typography>
-          <FormTextField fullWidth name="firstName" placeholder="First Name"
+          <Typography variant="body2" className={classes.label}>First name</Typography>
+          <TextField fullWidth className={classes.textField} name="firstName" placeholder="First Name"
             size="small" value={form.firstName} onChange={handleChange} />
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" style={labelStyle}>Last name</Typography>
-          <FormTextField fullWidth name="lastName" placeholder="Last Name"
+          <Typography variant="body2" className={classes.label}>Last name</Typography>
+          <TextField fullWidth className={classes.textField} name="lastName" placeholder="Last Name"
             size="small" value={form.lastName} onChange={handleChange} />
         </Grid>
-      </GridContainer>
+      </Grid>
 
-      <Box style={{ marginBottom: '16px' }}>
-        <Typography variant="body2" style={labelStyle}>Email</Typography>
-        <FormTextField fullWidth name="email" type="email"
+      <Box className={classes.emailField}>
+        <Typography variant="body2" className={classes.label}>Email</Typography>
+        <TextField fullWidth className={classes.textField} name="email" type="email"
           placeholder="Enter email address" size="small"
           value={form.email} onChange={handleChange} />
       </Box>
 
-      <Box style={{ marginBottom: '32px' }}>
-        <Typography variant="body2" style={labelStyle}>Password</Typography>
-        <FormTextField fullWidth name="password" type="password"
+      <Box className={classes.passwordField}>
+        <Typography variant="body2" className={classes.label}>Password</Typography>
+        <TextField fullWidth className={classes.textField} name="password" type="password"
           placeholder="Enter Account Password" size="small"
           value={form.password} onChange={handleChange} />
       </Box>
 
-      <Button fullWidth variant="contained" style={primaryButtonStyle}
+      <Button fullWidth variant="contained" className={classes.primaryButton}
         onClick={onRegister} disabled={loading}>
         {loading ? 'Signing up...' : 'Sign Up'}
       </Button>
 
       <Button fullWidth variant="text" onClick={onBackToLogin}
-        style={{ marginTop: '16px', color: '#888', textTransform: 'none' }}>
+        className={classes.secondaryLink}>
         Already have an account? Sign In
       </Button>
     </Box>

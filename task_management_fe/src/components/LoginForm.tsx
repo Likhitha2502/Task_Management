@@ -1,14 +1,11 @@
 // src/components/LoginForm.tsx
-import { Box, TextField, Button, Typography, styled } from '@mui/material';
-import { labelStyle, primaryButtonStyle, forgotPasswordBtnStyle } from '../pages/LoginPage.styles';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import { useLoginPageStyles } from '../pages/LoginPage.styles';
+import { useLoginFormStyles } from './LoginForm.styles';
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { boundActions, selectors } from '../app/index';
 import { PasswordField } from './PasswordField';
-
-const FormTextField = styled(TextField)({
-  borderRadius: '6px',
-});
 
 type LoginFormProps = {
   onSignUpClick: () => void;
@@ -16,6 +13,8 @@ type LoginFormProps = {
 };
 
 export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
+  const { classes } = useLoginFormStyles();
+  const { classes: pageClasses, cx } = useLoginPageStyles();
   const error = useSelector(selectors.auth.isError);
 
   const [form, setForm] = useState({ email: '', password: '' });
@@ -34,17 +33,18 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
   }, [form]);
 
   return (
-    <Box component="form" style={{ width: '100%' }}>
+    <Box component="form" className={classes.form}>
       {error && (
-        <Typography variant="body2" style={{ color: '#d32f2f', marginBottom: '12px', fontSize: '0.85rem' }}>
+        <Typography variant="body2" className={classes.errorText}>
           {error}
         </Typography>
       )}
 
-      <Box style={{ marginBottom: '16px' }}>
-        <Typography variant="body2" style={labelStyle}>Email</Typography>
-        <FormTextField
+      <Box className={classes.fieldGroup}>
+        <Typography variant="body2" className={pageClasses.label}>Email</Typography>
+        <TextField
           fullWidth
+          className={classes.textField}
           name="email"
           type="email"
           placeholder="Enter email address"
@@ -54,17 +54,7 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
         />
       </Box>
 
-      <Box style={{ marginBottom: '8px' }}>
-        {/* <Typography variant="body2" style={labelStyle}>Password</Typography> */}
-        {/* <FormTextField
-          fullWidth
-          name="password"
-          type="password"
-          placeholder="Enter Account Password"
-          size="small"
-          value={form.password}
-          onChange={handleChange}
-        /> */}
+      <Box className={classes.passwordFieldGroup}>
         <PasswordField
           name="password"
           label="Password"
@@ -74,8 +64,8 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
         />
       </Box>
 
-      <Box style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
-        <Button variant="text" onClick={onForgotClick} style={forgotPasswordBtnStyle}>
+      <Box className={classes.forgotRow}>
+        <Button variant="text" onClick={onForgotClick} className={pageClasses.forgotPasswordButton}>
           Forgot Password?
         </Button>
       </Box>
@@ -83,19 +73,19 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
       <Button
         fullWidth
         variant="contained"
-        style={primaryButtonStyle}
+        className={pageClasses.primaryButton}
         onClick={onLogin}
       >
         Sign in to my workspace
       </Button>
 
-      <Typography style={{ textAlign: 'center', margin: '8px 0', color: '#757575' }}>or</Typography>
+      <Typography className={classes.orDivider}>or</Typography>
 
       <Button
         fullWidth
         variant="contained"
         onClick={onSignUpClick}
-        style={{ ...primaryButtonStyle, marginBottom: 0 }}
+        className={cx(pageClasses.primaryButton, pageClasses.primaryButtonFlush)}
       >
         Create an account
       </Button>

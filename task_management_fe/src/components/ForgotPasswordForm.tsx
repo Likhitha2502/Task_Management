@@ -1,13 +1,10 @@
-import { Box, TextField, Button, Typography, styled } from '@mui/material';
-import { labelStyle, primaryButtonStyle, helperTextStyle } from '../styles/Form.styles';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import { useForgotPasswordFormStyles } from './ForgotPasswordForm.styles';
 import { useCallback, useState } from 'react';
 import { boundActions } from '../app/index';
 
-const FormTextField = styled(TextField)({
-  borderRadius: '6px',
-});
-
 export const ForgotPasswordForm = ({ onBackToLogin }: any) => {
+  const { classes } = useForgotPasswordFormStyles();
   const [form, setForm] = useState({ email: '' });
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,26 +15,27 @@ export const ForgotPasswordForm = ({ onBackToLogin }: any) => {
   const onSendEmail = useCallback(() => {
     boundActions.auth.forgotPasswordRequest({
       email: form.email,
-    })
+    });
   }, [form]);
   return (
-    <Box component="form" style={{ width: '100%' }}>
-      <Box style={{ marginBottom: '24px' }}>
-        <Typography variant="body2" style={labelStyle}>Email</Typography>
-        <FormTextField
+    <Box component="form" className={classes.form}>
+      <Box className={classes.emailSection}>
+        <Typography variant="body2" className={classes.label}>Email</Typography>
+        <TextField
           fullWidth
+          className={classes.textField}
           name="email"
           placeholder="Enter email address"
           size="small"
           value={form.email}
           onChange={handleChange}
         />
-        <Typography style={helperTextStyle}>
+        <Typography className={classes.helperText}>
           Enter the email address associated with your account to receive a temporary password.
         </Typography>
       </Box>
 
-      <Button fullWidth variant="contained" style={primaryButtonStyle} onClick={onSendEmail}>
+      <Button fullWidth variant="contained" className={classes.primaryButton} onClick={onSendEmail}>
         Send Email
       </Button>
 
@@ -45,7 +43,7 @@ export const ForgotPasswordForm = ({ onBackToLogin }: any) => {
         fullWidth
         variant="text"
         onClick={onBackToLogin}
-        style={{ marginTop: '16px', color: '#888', textTransform: 'none' }}
+        className={classes.secondaryButton}
       >
         Back to Sign In
       </Button>

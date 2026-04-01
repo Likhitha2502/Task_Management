@@ -6,11 +6,14 @@ import { useDashboardStyles } from './Dashboard.styles';
 import { TaskLists } from './TasksList';
 import { TasksProgress } from './TaskProgress';
 import { ChangePasswordModal } from '@/components/PasswordChangeModal';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants';
 
 type NavItem = 'tasks' | 'progress';
 
 export const DashboardPage = () => {
     const { classes, cx } = useDashboardStyles();
+    const navigate = useNavigate();
 
     const [activeNav, setActiveNav] = useState<NavItem>('tasks');
     const [profileOpen, setProfileOpen] = useState(false);
@@ -73,8 +76,6 @@ export const DashboardPage = () => {
                 <header className={classes.header}>
                     <div className={classes.headerSpacer} />
 
-                    <button className={classes.newTaskBtn}>+ New Task</button>
-
                     {/* Profile dropdown */}
                     <div className={classes.profileWrapper}>
                         <button
@@ -96,7 +97,15 @@ export const DashboardPage = () => {
                                     </div>
                                 </div>
                                 <div className={classes.dropdownDivider} />
-                                <button className={classes.dropdownItem}>⚙ Settings</button>
+                                <button
+                                    className={classes.dropdownItem}
+                                    onClick={() => {
+                                        setProfileOpen(false);
+                                        navigate(ROUTES.userProfile);
+                                    }}
+                                >
+                                    👤 View Profile
+                                </button>
                                 <button className={classes.dropdownItem} onClick={handleLogout}>
                                     ⎋ Sign out
                                 </button>

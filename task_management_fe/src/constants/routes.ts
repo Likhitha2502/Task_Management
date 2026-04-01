@@ -7,5 +7,5 @@ export const ROUTES = {
     },
     tasks: '/tasks',
     progress: '/progress',
-    profile: '/profile',
+    userProfile: '/user-profile',
 };
