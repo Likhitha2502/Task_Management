@@ -1,6 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect } from 'react';
 import { Box, Typography, Avatar, Paper } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
 import { LoginForm } from '../components/LoginForm';
 import { SignUpForm } from '../components/SignUpForm';
 import { ForgotPasswordForm } from '../components/ForgotPasswordForm';
@@ -8,30 +11,29 @@ import {
   pageWrapperStyle, cardStyle, logoContainerStyle,
   headerContainerStyle, dividerStyle
 } from './LoginPage.styles';
-import { useSelector } from 'react-redux';
 import { selectors, boundActions } from '../app/index';
+import { ROUTES } from '@/constants';
 
 const LoginPage = () => {
   const [view, setView] = useState<'login' | 'signup' | 'forgot'>('login');
-
-  const isAuthorized = useSelector(selectors.auth.isAuthorized);
+  const navigate = useNavigate();
+  const registrationSuccess = useSelector(selectors.auth.registrationSuccess);
   const isLoginSuccess = useSelector(selectors.auth.isLoginSuccess);
 
   // Auto-switch to login view after successful registration
   useEffect(() => {
-    if (isAuthorized) {
+    if (registrationSuccess) {
       boundActions.auth.clearError();
       setView('login');
     }
-  }, [isAuthorized]);
+  }, [registrationSuccess]);
 
   // Navigate to dashboard/app after successful login
   useEffect(() => {
     if (isLoginSuccess) {
-      // Replace with your router navigation e.g: navigate('/dashboard')
-      console.log('[LoginPage] Login successful — redirect to dashboard here');
+      navigate(ROUTES.tasks);
     }
-  }, [isLoginSuccess]);
+  }, [isLoginSuccess, navigate]);
 
   const getHeaderText = () => {
     if (view === 'login') return 'Sign in';

@@ -4,6 +4,7 @@ import { labelStyle, primaryButtonStyle, forgotPasswordBtnStyle } from '../pages
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { boundActions, selectors } from '../app/index';
+import { PasswordField } from './PasswordField';
 
 const FormTextField = styled(TextField)({
   borderRadius: '6px',
@@ -54,13 +55,20 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
       </Box>
 
       <Box style={{ marginBottom: '8px' }}>
-        <Typography variant="body2" style={labelStyle}>Password</Typography>
-        <FormTextField
+        {/* <Typography variant="body2" style={labelStyle}>Password</Typography> */}
+        {/* <FormTextField
           fullWidth
           name="password"
           type="password"
           placeholder="Enter Account Password"
           size="small"
+          value={form.password}
+          onChange={handleChange}
+        /> */}
+        <PasswordField
+          name="password"
+          label="Password"
+          placeholder="Enter Account Password"
           value={form.password}
           onChange={handleChange}
         />

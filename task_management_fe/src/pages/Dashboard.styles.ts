@@ -1,8 +1,10 @@
+import { makeStyles } from 'tss-react/mui';
+
 const CORAL = '#D35F55';
 const CORAL_LIGHT = '#fdf1f0';
 const SIDEBAR_WIDTH = 220;
 
-export const styles: Record<string, React.CSSProperties> = {
+export const useDashboardStyles = makeStyles()({
   root: {
     display: 'flex',
     height: '100vh',
@@ -12,7 +14,7 @@ export const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#f7f7f5',
   },
 
-  // ── Sidebar ────────────────────────────────────────────────────────────────
+  // ── Sidebar ──────────────────────────────────────────────────────────────
   sidebar: {
     width: SIDEBAR_WIDTH,
     minWidth: SIDEBAR_WIDTH,
@@ -20,7 +22,6 @@ export const styles: Record<string, React.CSSProperties> = {
     borderRight: '1px solid #ebebeb',
     display: 'flex',
     flexDirection: 'column',
-    padding: '0',
     boxShadow: '1px 0 8px rgba(0,0,0,0.04)',
   },
   logoRow: {
@@ -40,14 +41,12 @@ export const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: 'Georgia, serif',
     flexShrink: 0,
   },
   logoText: {
     fontWeight: 700,
     fontSize: '17px',
     color: '#1a1a1a',
-    fontFamily: 'Georgia, serif',
     letterSpacing: '-0.3px',
   },
   sidebarDivider: {
@@ -62,7 +61,6 @@ export const styles: Record<string, React.CSSProperties> = {
     letterSpacing: '0.08em',
     padding: '0 20px',
     marginBottom: '6px',
-    fontFamily: 'Georgia, serif',
   },
   nav: {
     display: 'flex',
@@ -82,7 +80,7 @@ export const styles: Record<string, React.CSSProperties> = {
     fontSize: '13.5px',
     color: '#555',
     fontFamily: 'Georgia, serif',
-    textAlign: 'left',
+    textAlign: 'left' as const,
     width: '100%',
     transition: 'background 0.15s, color 0.15s',
   },
@@ -94,7 +92,7 @@ export const styles: Record<string, React.CSSProperties> = {
   navIcon: {
     fontSize: '13px',
     width: '16px',
-    textAlign: 'center',
+    textAlign: 'center' as const,
     flexShrink: 0,
   },
   navBadge: {
@@ -105,10 +103,9 @@ export const styles: Record<string, React.CSSProperties> = {
     fontSize: '11px',
     fontWeight: 700,
     padding: '1px 7px',
-    fontFamily: 'Georgia, serif',
   },
 
-  // ── Main ───────────────────────────────────────────────────────────────────
+  // ── Main ─────────────────────────────────────────────────────────────────
   main: {
     flex: 1,
     display: 'flex',
@@ -138,12 +135,11 @@ export const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     fontFamily: 'Georgia, serif',
     cursor: 'pointer',
-    letterSpacing: '0.01em',
   },
 
-  // ── Profile ────────────────────────────────────────────────────────────────
+  // ── Profile ───────────────────────────────────────────────────────────────
   profileWrapper: {
-    position: 'relative',
+    position: 'relative' as const,
   },
   profileBtn: {
     display: 'flex',
@@ -154,7 +150,6 @@ export const styles: Record<string, React.CSSProperties> = {
     borderRadius: '20px',
     padding: '5px 12px 5px 6px',
     cursor: 'pointer',
-    fontFamily: 'Georgia, serif',
   },
   profileAvatar: {
     width: 28,
@@ -167,16 +162,14 @@ export const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: 'Georgia, serif',
     flexShrink: 0,
   },
   profileName: {
     fontSize: '13px',
     color: '#333',
-    fontFamily: 'Georgia, serif',
   },
   profileDropdown: {
-    position: 'absolute',
+    position: 'absolute' as const,
     top: 'calc(100% + 8px)',
     right: 0,
     backgroundColor: '#fff',
@@ -185,7 +178,7 @@ export const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
     width: 220,
     zIndex: 100,
-    overflow: 'hidden',
+    overflow: 'hidden' as const,
   },
   dropdownHeader: {
     display: 'flex',
@@ -204,7 +197,6 @@ export const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: 'Georgia, serif',
     flexShrink: 0,
   },
   dropdownName: {
@@ -212,13 +204,11 @@ export const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     fontWeight: 600,
     color: '#1a1a1a',
-    fontFamily: 'Georgia, serif',
   },
   dropdownEmail: {
     margin: 0,
     fontSize: '11px',
     color: '#999',
-    fontFamily: 'Georgia, serif',
   },
   dropdownDivider: {
     height: '1px',
@@ -230,58 +220,21 @@ export const styles: Record<string, React.CSSProperties> = {
     padding: '11px 16px',
     background: 'transparent',
     border: 'none',
-    textAlign: 'left',
+    textAlign: 'left' as const,
     fontSize: '13px',
     color: '#444',
-    fontFamily: 'Georgia, serif',
     cursor: 'pointer',
   },
   dropdownOverlay: {
-    position: 'fixed',
+    position: 'fixed' as const,
     inset: 0,
     zIndex: 99,
   },
 
-  // ── Content ────────────────────────────────────────────────────────────────
+  // ── Content ───────────────────────────────────────────────────────────────
   content: {
     flex: 1,
-    overflowY: 'auto',
+    overflowY: 'auto' as const,
     padding: '32px 40px',
   },
-  viewContainer: {
-    maxWidth: 860,
-  },
-  viewTitle: {
-    margin: '0 0 32px',
-    fontSize: '22px',
-    fontWeight: 700,
-    color: '#1a1a1a',
-    fontFamily: 'Georgia, serif',
-    letterSpacing: '-0.3px',
-  },
-  emptyState: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 0',
-    gap: '10px',
-  },
-  emptyIcon: {
-    fontSize: '48px',
-    marginBottom: '8px',
-  },
-  emptyHeading: {
-    margin: 0,
-    fontSize: '16px',
-    fontWeight: 600,
-    color: '#333',
-    fontFamily: 'Georgia, serif',
-  },
-  emptySubtext: {
-    margin: 0,
-    fontSize: '13px',
-    color: '#999',
-    fontFamily: 'Georgia, serif',
-  },
-};
+});

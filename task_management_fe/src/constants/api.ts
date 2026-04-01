@@ -1,8 +1,18 @@
-export const API_CONFIG = {
-    BASE_URL: 'http://localhost:8080/api',
-    ENDPOINTS: {
-      LOGIN: '/auth/login',
-      REGISTER: '/auth/register',
-      FORGOT_PASSWORD: '/auth/forgot-password'
-    }
-  };
+import { ChangePassword } from '../models/auth';
+const BASE = {
+  auth: '/auth',
+  profile: '/profile',
+} as const;
+
+export const api = {
+  auth: {
+    register: `${BASE.auth}/register`,
+    login: `${BASE.auth}/login`,
+    logout: `${BASE.auth}/logout`,
+    resetPassword: `${BASE.auth}/reset-password`,
+    forgotPassword: `${BASE.auth}/forgot-password`,
+  },
+  profile: {
+    changePassword: `${BASE.profile}/change-password`
+  }
+};

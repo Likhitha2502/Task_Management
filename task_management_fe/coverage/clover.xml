@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1774557628931" clover="3.2.0">
+  <project timestamp="1774557628931" name="All files">
+    <metrics statements="56" coveredstatements="54" conditionals="58" coveredconditionals="12" methods="23" coveredmethods="22" elements="137" coveredelements="88" complexity="0" loc="56" ncloc="56" packages="2" files="3" classes="3"/>
+    <package name="features.auth">
+      <metrics statements="49" coveredstatements="47" conditionals="56" coveredconditionals="10" methods="22" coveredmethods="21"/>
+      <file name="authSlice.ts" path="/Users/likhithashrinivasgudalwar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Day1-CPT/STV/Task_Management/task_management_fe/src/features/auth/authSlice.ts">
+        <metrics statements="49" coveredstatements="47" conditionals="56" coveredconditionals="10" methods="22" coveredmethods="21"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="37" count="1" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="48" count="1" type="stmt"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="53" count="1" type="stmt"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="59" count="1" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="68" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="74" count="1" type="stmt"/>
+        <line num="75" count="1" type="stmt"/>
+        <line num="76" count="1" type="stmt"/>
+        <line num="81" count="2" type="stmt"/>
+        <line num="86" count="1" type="stmt"/>
+        <line num="88" count="1" type="stmt"/>
+        <line num="92" count="17" type="stmt"/>
+        <line num="94" count="1" type="stmt"/>
+        <line num="95" count="2" type="stmt"/>
+        <line num="96" count="3" type="stmt"/>
+        <line num="97" count="3" type="stmt"/>
+        <line num="98" count="2" type="stmt"/>
+        <line num="99" count="2" type="stmt"/>
+        <line num="104" count="1" type="stmt"/>
+        <line num="105" count="3" type="stmt"/>
+        <line num="108" count="2" type="stmt"/>
+        <line num="109" count="1" type="stmt"/>
+        <line num="112" count="1" type="cond" truecount="10" falsecount="6"/>
+        <line num="116" count="1" type="stmt"/>
+        <line num="122" count="1" type="stmt"/>
+        <line num="123" count="3" type="stmt"/>
+        <line num="126" count="1" type="stmt"/>
+        <line num="127" count="1" type="stmt"/>
+        <line num="130" count="0" type="cond" truecount="0" falsecount="16"/>
+        <line num="134" count="0" type="stmt"/>
+        <line num="140" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="models">
+      <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+      <file name="index.ts" path="/Users/likhithashrinivasgudalwar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Day1-CPT/STV/Task_Management/task_management_fe/src/models/index.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+      </file>
+      <file name="requestStatus.ts" path="/Users/likhithashrinivasgudalwar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Day1-CPT/STV/Task_Management/task_management_fe/src/models/requestStatus.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

@@ -1,114 +1,103 @@
-import { boundActions } from "@/app/index";
-import { useState } from "react";
-import { styles } from "./Dashboard.styles";
-import { TaskLists } from "./TasksList";
-import { TasksProgress } from "./TaskProgress";
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { boundActions } from '@/app/index';
+import { selectors } from '@/app/selectors';
+import { useDashboardStyles } from './Dashboard.styles';
+import { TaskLists } from './TasksList';
+import { TasksProgress } from './TaskProgress';
+import { ChangePasswordModal } from '@/components/PasswordChangeModal';
 
 type NavItem = 'tasks' | 'progress';
 
 export const DashboardPage = () => {
+    const { classes, cx } = useDashboardStyles();
+
     const [activeNav, setActiveNav] = useState<NavItem>('tasks');
     const [profileOpen, setProfileOpen] = useState(false);
 
-    //const currentUser = useSelector(selectors.auth.getCurrentUser);
-    const currentUser = {
-        firstName: 'user',
-        lastName: 'one',
-        email: 'userone@a.com',
-    };
-    // Derive initials from username for avatar
-    const initials = currentUser
-        ? `${currentUser?.firstName.toUpperCase().slice(0, 2)}${currentUser?.lastName.toUpperCase().slice(0, 2)}`
-        : 'U';
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const mustChangePassword = useSelector(selectors.auth.mustChangePassword);
+    const loggedInUser = useSelector(selectors.auth.loggedInUser);
+
+    const initials = 'UI';
 
     const handleLogout = () => {
         boundActions.auth.logout();
-        // Replace with: navigate('/login')
     };
 
-    return (
-        <div style={styles.root}>
+    useEffect(() => {
+        if (mustChangePassword) {
+            setChangePasswordOpen(true);
+        }
+    }, [mustChangePassword]);
 
-            {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-            <aside style={styles.sidebar}>
-                {/* Logo */}
-                <div style={styles.logoRow}>
-                    <div style={styles.logoAvatar}>F</div>
-                    <span style={styles.logoText}>FocusFlow</span>
+    return (
+        <div className={classes.root}>
+
+            <aside className={classes.sidebar}>
+                <div className={classes.logoRow}>
+                    <div className={classes.logoAvatar}>F</div>
+                    <span className={classes.logoText}>FocusFlow</span>
                 </div>
 
-                <div style={styles.sidebarDivider} />
+                <div className={classes.sidebarDivider} />
 
-                {/* Nav section label */}
-                <p style={styles.navLabel}>MY WORKSPACE</p>
+                <p className={classes.navLabel}>MY WORKSPACE</p>
 
-                {/* Nav items */}
-                <nav style={styles.nav}>
+                <nav className={classes.nav}>
                     <button
-                        style={{
-                            ...styles.navItem,
-                            ...(activeNav === 'tasks' ? styles.navItemActive : {}),
-                        }}
+                        className={cx(classes.navItem, activeNav === 'tasks' && classes.navItemActive)}
                         onClick={() => setActiveNav('tasks')}
                     >
-                        <span style={styles.navIcon}>☰</span>
+                        <span className={classes.navIcon}>☰</span>
                         My Tasks
-                        <span style={{
-                            ...styles.navBadge,
-                            opacity: activeNav === 'tasks' ? 1 : 0.5,
-                        }}>
+                        <span className={classes.navBadge} style={{ opacity: activeNav === 'tasks' ? 1 : 0.5 }}>
                             0
                         </span>
                     </button>
 
                     <button
-                        style={{
-                            ...styles.navItem,
-                            ...(activeNav === 'progress' ? styles.navItemActive : {}),
-                        }}
+                        className={cx(classes.navItem, activeNav === 'progress' && classes.navItemActive)}
                         onClick={() => setActiveNav('progress')}
                     >
-                        <span style={styles.navIcon}>▶</span>
+                        <span className={classes.navIcon}>▶</span>
                         Progress
                     </button>
                 </nav>
             </aside>
 
-            {/* ── Main area ───────────────────────────────────────────────────── */}
-            <div style={styles.main}>
+            {/* ── Main area ─────────────────────────────────────────────────────── */}
+            <div className={classes.main}>
 
                 {/* Header */}
-                <header style={styles.header}>
-                    <div style={styles.headerSpacer} />
+                <header className={classes.header}>
+                    <div className={classes.headerSpacer} />
 
-                    {/* New Task button */}
-                    <button style={styles.newTaskBtn}>
-                        + New Task
-                    </button>
+                    <button className={classes.newTaskBtn}>+ New Task</button>
 
                     {/* Profile dropdown */}
-                    <div style={styles.profileWrapper}>
+                    <div className={classes.profileWrapper}>
                         <button
-                            style={styles.profileBtn}
+                            className={classes.profileBtn}
                             onClick={() => setProfileOpen((o) => !o)}
                         >
-                            <div style={styles.profileAvatar}>{initials}</div>
-                            <span style={styles.profileName}>{currentUser?.firstName ?? 'Account'}</span>
+                            <div className={classes.profileAvatar}>{initials}</div>
+                            <span className={classes.profileName}>{'F' ?? 'Account'}</span>
                             <span style={{ fontSize: '10px', color: '#999', marginLeft: '2px' }}>▾</span>
                         </button>
 
                         {profileOpen && (
-                            <div style={styles.profileDropdown}>
-                                <div style={styles.dropdownHeader}>
-                                    <div style={styles.dropdownAvatar}>{initials}</div>
+                            <div className={classes.profileDropdown}>
+                                <div className={classes.dropdownHeader}>
+                                    <div className={classes.dropdownAvatar}>{initials}</div>
                                     <div>
-                                        <p style={styles.dropdownName}>{currentUser?.firstName ?? '—'}</p>
-                                        <p style={styles.dropdownEmail}>{currentUser?.email ?? '—'}</p>
+                                        <p className={classes.dropdownName}>{'—'}</p>
+                                        <p className={classes.dropdownEmail}>{loggedInUser?.email ?? '—'}</p>
                                     </div>
                                 </div>
-                                <div style={styles.dropdownDivider} />
-                                <button style={styles.dropdownItem}>⚙ Settings</button>
-                                <button style={styles.dropdownItem} onClick={handleLogout}>
+                                <div className={classes.dropdownDivider} />
+                                <button className={classes.dropdownItem}>⚙ Settings</button>
+                                <button className={classes.dropdownItem} onClick={handleLogout}>
                                     ⎋ Sign out
                                 </button>
                             </div>
@@ -117,7 +106,7 @@ export const DashboardPage = () => {
                 </header>
 
                 {/* Content */}
-                <main style={styles.content}>
+                <main className={classes.content}>
                     {activeNav === 'tasks' && <TaskLists />}
                     {activeNav === 'progress' && <TasksProgress />}
                 </main>
@@ -125,11 +114,14 @@ export const DashboardPage = () => {
 
             {/* Close dropdown on outside click */}
             {profileOpen && (
-                <div
-                    style={styles.dropdownOverlay}
-                    onClick={() => setProfileOpen(false)}
-                />
+                <div className={classes.dropdownOverlay} onClick={() => setProfileOpen(false)} />
             )}
+
+            <ChangePasswordModal
+                open={changePasswordOpen}
+                onClose={() => { if (!mustChangePassword) setChangePasswordOpen(false); }}
+                forced={mustChangePassword}
+            />
         </div>
     );
 };
