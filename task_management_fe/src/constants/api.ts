@@ -1,4 +1,3 @@
-import { ChangePassword } from '../models/auth';
 const BASE = {
   auth: '/auth',
   profile: '/profile',
@@ -13,6 +12,7 @@ export const api = {
     forgotPassword: `${BASE.auth}/forgot-password`,
   },
   profile: {
-    changePassword: `${BASE.profile}/change-password`
+    changePassword: `${BASE.profile}/change-password`,
+    userInfo: (email: string) => `${BASE.profile}?email=${email}`,
   }
 };

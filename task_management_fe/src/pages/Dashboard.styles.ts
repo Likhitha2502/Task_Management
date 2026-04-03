@@ -116,7 +116,7 @@ export const useDashboardStyles = makeStyles()({
     display: 'flex',
     alignItems: 'center',
     padding: '0 28px',
-    height: 56,
+    height: 71,
     backgroundColor: '#ffffff',
     borderBottom: '1px solid #ebebeb',
     gap: '14px',

@@ -5,57 +5,44 @@ const CORAL = '#D35F55';
 const CORAL_LIGHT = '#fdf1f0';
 
 export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
-  root: {
-    minHeight: '100vh',
-    backgroundColor: '#f7f7f5',
-    fontFamily: 'Georgia, serif',
-  },
-
-  header: {
-    height: 56,
-    backgroundColor: '#fff',
-    borderBottom: '1px solid #ebebeb',
+ // ── Page header inside content ─────────────────────────────────────────────
+  pageHeader: {
     display: 'flex',
     alignItems: 'center',
-    padding: '0 32px',
-    gap: '12px',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 10,
+    gap: '16px',
+    marginBottom: '32px',
   },
   backBtn: {
     color: '#555',
     border: '1px solid #ebebeb',
     borderRadius: '8px',
-    padding: '6px 14px',
+    padding: '7px 14px',
     fontFamily: 'Georgia, serif',
     fontSize: '13px',
-    background: 'transparent',
+    background: '#fff',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    '&:hover': { borderColor: '#ccc' },
   },
-  headerTitle: {
+  pageTitle: {
     fontFamily: 'Georgia, serif',
     fontWeight: 700,
-    fontSize: '17px',
+    fontSize: '20px',
     color: '#1a1a1a',
   },
-  headerDivider: {
-    margin: '12px 4px',
-  },
 
-  content: {
-    maxWidth: 900,
-    margin: '40px auto',
-    padding: '0 24px',
+  // ── Two-column grid ────────────────────────────────────────────────────────
+  grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: '24px',
     alignItems: 'start',
   },
 
+  // ── Cards ──────────────────────────────────────────────────────────────────
   card: {
     backgroundColor: '#fff',
     borderRadius: '16px',
@@ -68,22 +55,22 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
     fontWeight: 700,
     fontSize: '16px',
     color: '#1a1a1a',
-    marginBottom: '6px',
+    marginBottom: '4px',
+    textAlign: 'center' as const,
   },
   cardSubtitle: {
     fontFamily: 'Georgia, serif',
     fontSize: '12px',
     color: '#999',
-    marginBottom: '28px',
+    marginBottom: '24px',
+    textAlign: 'center' as const,
   },
 
+  // ── Avatar ─────────────────────────────────────────────────────────────────
   avatarWrapper: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '28px',
     position: 'relative' as const,
     width: 'fit-content',
-    margin: '0 auto 28px',
+    margin: '0 auto 24px',
   },
   avatarLarge: {
     width: 88,
@@ -109,45 +96,43 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
     padding: 0,
   },
 
-  hiddenFileInput: {
-    display: 'none',
-  },
-
+  // ── Fields ─────────────────────────────────────────────────────────────────
   fieldLabel: {
     fontSize: '12px',
     fontWeight: 600,
     color: '#555',
     marginBottom: '6px',
     fontFamily: 'Georgia, serif',
-    letterSpacing: '0.02em',
   },
   fieldRow: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '16px',
+    gap: '14px',
     marginBottom: '16px',
   },
   fieldBox: {
     marginBottom: '16px',
   },
 
-  passwordCard: {
-    backgroundColor: '#fff',
-    borderRadius: '16px',
-    border: '1px solid #ebebeb',
-    padding: '32px',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-  },
+  // ── Password card ──────────────────────────────────────────────────────────
   passwordIcon: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
     backgroundColor: CORAL_LIGHT,
-    borderRadius: '12px',
+    borderRadius: '14px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: '20px',
-    fontSize: '22px',
+    margin: '0 auto 20px',
+    fontSize: '24px',
+  },
+  passwordCardTitle: {
+    fontFamily: 'Georgia, serif',
+    fontWeight: 700,
+    fontSize: '16px',
+    color: '#1a1a1a',
+    marginBottom: '4px',
+    textAlign: 'center' as const,
   },
   passwordHint: {
     fontSize: '13px',
@@ -155,39 +140,7 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
     fontFamily: 'Georgia, serif',
     lineHeight: 1.6,
     marginBottom: '28px',
-  },
-
-  saveRow: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: '8px',
-  },
-  saveBtnProgress: {
-    color: '#fff',
-  },
-
-  saveBtn: {
-    backgroundColor: CORAL,
-    color: '#fff',
-    borderRadius: '8px',
-    textTransform: 'none' as const,
-    fontFamily: 'Georgia, serif',
-    fontWeight: 600,
-    fontSize: '14px',
-    padding: '9px 24px',
-    '&:hover': { backgroundColor: '#c0544a' },
-  },
-  changePasswordBtn: {
-    borderColor: CORAL,
-    color: CORAL,
-    borderRadius: '8px',
-    textTransform: 'none' as const,
-    fontFamily: 'Georgia, serif',
-    fontWeight: 600,
-    fontSize: '14px',
-    padding: '9px 24px',
-    width: '100%',
-    '&:hover': { backgroundColor: CORAL_LIGHT },
+    textAlign: 'center' as const,
   },
 });
 
