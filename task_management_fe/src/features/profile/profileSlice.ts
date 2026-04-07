@@ -5,7 +5,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { RootState } from '../../app/store';
 import { api } from '@/constants/api';
-import { RequestStatus, User, ProfilePayload } from '../../models';
+import { User, ProfilePayload } from '../../models';
 import http from '../../services/http';
 import { getResponseError } from '@/utils/response';
 
@@ -47,7 +47,7 @@ const profileSlice = createSlice({
       state.error = action.payload;
     },
 
-    updateUserProfileRequest(state, _action: PayloadAction<ProfilePayload>) {
+    updateUserProfileRequest(state, _action: PayloadAction<{ email: string; values: ProfilePayload }>) {
       state.loading.update = true;
       state.status = null;
       state.error = null;
@@ -105,8 +105,8 @@ const fetchUserProfileEpic: Epic = (action$) =>
 const updateUserProfileEpic: Epic = (action$) =>
   action$.pipe(
     ofType(profileSliceActions.updateUserProfileRequest.type),
-    switchMap(({ payload }: { type: string; payload: ProfilePayload }) =>
-      from(http.put<User>(api.profile.updateUserInfo, payload)).pipe(
+    switchMap(({ payload }: { type: string; payload: { values: ProfilePayload, email: string } }) =>
+      from(http.put<User>(api.profile.updateUserInfo(payload.email), payload.values)).pipe(
         map((response) => profileSliceActions.updateUserProfileSuccess(response.data)),
         catchError((error) => {
           const message = getResponseError(error) || 'Failed to update user profile.';

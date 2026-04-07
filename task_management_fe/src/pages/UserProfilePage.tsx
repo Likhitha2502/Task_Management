@@ -4,25 +4,22 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Button, Typography, TextField, Avatar,
-  IconButton, Divider, CircularProgress,
+  IconButton, CircularProgress,
 } from '@mui/material';
 import { CameraAlt } from '@mui/icons-material';
 import { ChangePasswordModal } from '../components/PasswordChangeModal';
-import { ROUTES } from '../constants/routes';
+
 import {
   useUserProfileStyles,
   fieldSx,
-  cameraIconSx,
 } from './UserProfilePage.styles';
 import { AppLayout } from './AppLayout';
 import { boundActions, selectors } from '../app/index';
-import { profile } from 'node:console';
 
 const CORAL = '#D35F55';
 
 export const UserProfilePage = () => {
   const { classes } = useUserProfileStyles();
-  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentUser = useSelector(selectors.profile.userProfile, equals);
@@ -34,8 +31,7 @@ export const UserProfilePage = () => {
   const [form, setForm] = useState({
     firstName: currentUser?.firstName ?? '',
     lastName: currentUser?.lastName ?? '',
-    email: currentUser?.email ?? '',
-    file: currentUser?.file ?? ''
+    profilePicture: currentUser?.profilePicture ?? ''
   });
 
   const initials = form.firstName && form.lastName
@@ -57,8 +53,7 @@ export const UserProfilePage = () => {
 
   const handleSave = useCallback(() => {
     setSaving(true);
-    console.log('form', form);
-    boundActions.user.updateUserProfileRequest({ ...form });
+    boundActions.profile.updateUserProfileRequest({ values: { ...form }, email: loggedInUser?.email as string });
     setTimeout(() => setSaving(false), 800);
   }, [form]);
 
@@ -74,7 +69,7 @@ export const UserProfilePage = () => {
       setForm({
         firstName: currentUser.firstName ?? '',
         lastName: currentUser.lastName ?? '',
-        email: currentUser.email ?? '',
+        profilePicture: currentUser.profilePicture ?? '',
       });
     }
   }, [currentUser]); // This runs every time currentUser changes
@@ -136,8 +131,8 @@ export const UserProfilePage = () => {
           <Box className={classes.fieldBox}>
             <Typography className={classes.fieldLabel}>Email</Typography>
             <TextField fullWidth name="email" type="email" size="small"
-              placeholder="Email address" value={form.email}
-              onChange={handleChange} sx={fieldSx} />
+              placeholder="Email address" value={loggedInUser?.email as string}
+              onChange={handleChange} sx={fieldSx} disabled={true} />
           </Box>
 
           {/* Save — bottom right */}

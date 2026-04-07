@@ -4,12 +4,11 @@ export interface User {
     lastName: string;
     email: string;
     token?: string;
-    file?: File;
+    profilePicture?: File;
 }
 
 export interface ProfilePayload {
-    email: string;
     firstName: string;
     lastName: string;
-    file: File;
+    profilePicture: File | string;
 };
