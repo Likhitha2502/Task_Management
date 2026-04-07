@@ -64,6 +64,12 @@ body {
   min-width: 320px;
 }
 
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
 *,
 *::before,
 *::after {

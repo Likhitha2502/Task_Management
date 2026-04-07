@@ -13,6 +13,7 @@ export const api = {
   },
   profile: {
     changePassword: `${BASE.profile}/change-password`,
-    userInfo: (email: string) => `${BASE.profile}?email=${email}`,
+    userInfo: (email: string) => `${BASE.profile}/${email}`,
+    updateUserInfo: `${BASE.profile}`,
   }
 };

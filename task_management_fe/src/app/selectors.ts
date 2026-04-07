@@ -2,6 +2,9 @@
 import {
   selectors as authSelectors
 } from '../features/auth/authSlice';
+import {
+  selectors as profileSelectors,
+} from '../features/profile/profileSlice';
 
 // Add more slice selectors as your app grows:
 // import { selectAllTasks, selectTaskById, selectCompletedTasks } from './slices/taskSlice';
@@ -12,6 +15,7 @@ import {
 
 export const selectors = {
   auth: authSelectors,
+  profile: profileSelectors,
   // tasks: {
   //   selectAllTasks,
   //   selectTaskById,

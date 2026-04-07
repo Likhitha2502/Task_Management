@@ -3,14 +3,14 @@ import { makeStyles } from 'tss-react/mui';
 const CORAL = '#D35F55';
 const CORAL_LIGHT = '#fdf1f0';
 const SIDEBAR_WIDTH = 220;
+const HEADER_HEIGHT = 71;
 
 export const useDashboardStyles = makeStyles()({
   root: {
-    display: 'flex',
+    display: 'block',
     minHeight: '100dvh',
     width: '100%',
     maxWidth: '100%',
-    overflowX: 'hidden',
     fontFamily: '"Georgia", serif',
     backgroundColor: '#f7f7f5',
     '@media (max-width: 900px)': {
@@ -20,14 +20,26 @@ export const useDashboardStyles = makeStyles()({
 
   // ── Sidebar ──────────────────────────────────────────────────────────────
   sidebar: {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    zIndex: 20,
     width: SIDEBAR_WIDTH,
     minWidth: SIDEBAR_WIDTH,
     backgroundColor: '#ffffff',
     borderRight: '1px solid #ebebeb',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '1px 0 8px rgba(0,0,0,0.04)',
+    boxShadow: 'none',
+    marginLeft: 0,
+    paddingLeft: 0,
     '@media (max-width: 900px)': {
+      position: 'relative' as const,
+      top: 'auto',
+      left: 'auto',
+      bottom: 'auto',
+      zIndex: 'auto',
       width: '100%',
       minWidth: 0,
       borderRight: 'none',
@@ -37,8 +49,9 @@ export const useDashboardStyles = makeStyles()({
   logoRow: {
     display: 'flex',
     alignItems: 'center',
-    padding: '20px 20px 16px',
+    padding: '20px 0 16px 0',
     gap: '10px',
+    marginLeft: 12,
   },
   logoAvatar: {
     width: 34,
@@ -69,20 +82,22 @@ export const useDashboardStyles = makeStyles()({
     fontWeight: 700,
     color: '#aaa',
     letterSpacing: '0.08em',
-    padding: '0 20px',
+    padding: '0',
+    marginLeft: 12,
     marginBottom: '6px',
   },
   nav: {
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
-    padding: '0 10px',
+    padding: '0',
+    marginLeft: 12,
   },
   navItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '9px 12px',
+    padding: '9px 8px 9px 0',
     borderRadius: '8px',
     border: 'none',
     background: 'transparent',
@@ -117,22 +132,37 @@ export const useDashboardStyles = makeStyles()({
 
   // ── Main ─────────────────────────────────────────────────────────────────
   main: {
-    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     minWidth: 0,
+    marginLeft: SIDEBAR_WIDTH,
+    minHeight: '100dvh',
     overflow: 'hidden',
+    '@media (max-width: 900px)': {
+      marginLeft: 0,
+      minHeight: 'auto',
+    },
   },
   header: {
+    position: 'fixed' as const,
+    top: 0,
+    left: SIDEBAR_WIDTH,
+    right: 0,
+    zIndex: 30,
     display: 'flex',
     alignItems: 'center',
     padding: '0 28px',
-    height: 71,
+    height: HEADER_HEIGHT,
     backgroundColor: '#ffffff',
     borderBottom: '1px solid #ebebeb',
     gap: '14px',
     flexShrink: 0,
     '@media (max-width: 900px)': {
+      position: 'relative' as const,
+      top: 'auto',
+      left: 'auto',
+      right: 'auto',
+      zIndex: 'auto',
       padding: '0 16px',
     },
   },
@@ -245,16 +275,18 @@ export const useDashboardStyles = makeStyles()({
   dropdownOverlay: {
     position: 'fixed' as const,
     inset: 0,
-    zIndex: 99,
+    zIndex: 10,
   },
 
   // ── Content ───────────────────────────────────────────────────────────────
   content: {
     flex: 1,
     overflowY: 'auto' as const,
-    padding: '32px 40px',
+    padding: 'calc(32px + 71px) 40px 32px',
+    minHeight: '100dvh',
     '@media (max-width: 900px)': {
       padding: '20px 16px',
+      minHeight: 'auto',
     },
   },
 });

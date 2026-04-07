@@ -6,6 +6,9 @@ import { store } from './store';
 import {
     authSliceActions
 } from '../features/auth/authSlice';
+import {
+    profileSliceActions
+} from '../features/profile/profileSlice';
 
 // Add more slice imports as your app grows:
 // import { createTask, deleteTask, updateTask } from './slices/taskSlice';
@@ -18,6 +21,10 @@ import {
 export const boundActions = {
     auth: bindActionCreators(
         authSliceActions,
+        store.dispatch
+    ),
+    profile: bindActionCreators(
+        profileSliceActions,
         store.dispatch
     ),
 
