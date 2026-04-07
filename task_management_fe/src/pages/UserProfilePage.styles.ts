@@ -40,6 +40,9 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
     gridTemplateColumns: '1fr 1fr',
     gap: '24px',
     alignItems: 'start',
+    '@media (max-width: 1100px)': {
+      gridTemplateColumns: '1fr',
+    },
   },
 
   // ── Cards ──────────────────────────────────────────────────────────────────
@@ -49,6 +52,9 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
     border: '1px solid #ebebeb',
     padding: '32px',
     boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+    '@media (max-width: 600px)': {
+      padding: '20px 16px',
+    },
   },
   cardTitle: {
     fontFamily: 'Georgia, serif',
@@ -109,6 +115,9 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
     gridTemplateColumns: '1fr 1fr',
     gap: '14px',
     marginBottom: '16px',
+    '@media (max-width: 700px)': {
+      gridTemplateColumns: '1fr',
+    },
   },
   fieldBox: {
     marginBottom: '16px',

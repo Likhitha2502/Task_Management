@@ -7,11 +7,15 @@ const SIDEBAR_WIDTH = 220;
 export const useDashboardStyles = makeStyles()({
   root: {
     display: 'flex',
-    height: '100vh',
-    width: '100vw',
-    overflow: 'hidden',
+    minHeight: '100dvh',
+    width: '100%',
+    maxWidth: '100%',
+    overflowX: 'hidden',
     fontFamily: '"Georgia", serif',
     backgroundColor: '#f7f7f5',
+    '@media (max-width: 900px)': {
+      flexDirection: 'column',
+    },
   },
 
   // ── Sidebar ──────────────────────────────────────────────────────────────
@@ -23,6 +27,12 @@ export const useDashboardStyles = makeStyles()({
     display: 'flex',
     flexDirection: 'column',
     boxShadow: '1px 0 8px rgba(0,0,0,0.04)',
+    '@media (max-width: 900px)': {
+      width: '100%',
+      minWidth: 0,
+      borderRight: 'none',
+      borderBottom: '1px solid #ebebeb',
+    },
   },
   logoRow: {
     display: 'flex',
@@ -110,6 +120,7 @@ export const useDashboardStyles = makeStyles()({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    minWidth: 0,
     overflow: 'hidden',
   },
   header: {
@@ -121,6 +132,9 @@ export const useDashboardStyles = makeStyles()({
     borderBottom: '1px solid #ebebeb',
     gap: '14px',
     flexShrink: 0,
+    '@media (max-width: 900px)': {
+      padding: '0 16px',
+    },
   },
   headerSpacer: {
     flex: 1,
@@ -167,6 +181,9 @@ export const useDashboardStyles = makeStyles()({
   profileName: {
     fontSize: '13px',
     color: '#333',
+    '@media (max-width: 520px)': {
+      display: 'none',
+    },
   },
   profileDropdown: {
     position: 'absolute' as const,
@@ -236,5 +253,8 @@ export const useDashboardStyles = makeStyles()({
     flex: 1,
     overflowY: 'auto' as const,
     padding: '32px 40px',
+    '@media (max-width: 900px)': {
+      padding: '20px 16px',
+    },
   },
 });
