@@ -28,7 +28,7 @@ public class ProfileController {
     public Map<String, Object> updateProfile(@RequestParam String email,
                                              @RequestParam(required = false) String firstName,
                                              @RequestParam(required = false) String lastName,
-                                             @RequestParam(value = "file", required = false) MultipartFile file) {
+                                             @RequestParam(value = "profilePicture", required = false) MultipartFile file) {
         return authService.updateProfile(email, firstName, lastName, file);
     }
 
