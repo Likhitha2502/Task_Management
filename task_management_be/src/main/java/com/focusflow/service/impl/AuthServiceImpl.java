@@ -9,12 +9,17 @@ import com.focusflow.service.AuthService;
 import com.focusflow.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -92,30 +97,83 @@ public class AuthServiceImpl implements AuthService {
         response.put("email", user.getEmail());
         return response;
     }
+
+
     @Override
     public ProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
+        String profilePictureUrl = null;
+        if (user.getProfilePicture() != null && !user.getProfilePicture().isBlank()) {
+            profilePictureUrl = "/profile/picture/" + user.getEmail();
+        }
+
         return new ProfileResponse(
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-                user.getProfilePicture()
+                profilePictureUrl
         );
     }
 
     @Override
-    public Map<String, Object> updateProfile(String email, UpdateProfileRequest request) {
+    public Map<String, Object> updateProfile(String email, String firstName, String lastName, MultipartFile file) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
-            user.setFirstName(request.getFirstName());
+        if (firstName != null && !firstName.isBlank()) {
+            user.setFirstName(firstName);
         }
 
-        if (request.getLastName() != null && !request.getLastName().isBlank()) {
-            user.setLastName(request.getLastName());
+        if (lastName != null && !lastName.isBlank()) {
+            user.setLastName(lastName);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            String contentType = file.getContentType();
+            if (contentType == null ||
+                    !(contentType.equals("image/jpeg") ||
+                            contentType.equals("image/png") ||
+                            contentType.equals("image/jpg"))) {
+                throw new BadRequestException("Only JPG, JPEG, and PNG files are allowed");
+            }
+
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new BadRequestException("File size must be 5MB or less");
+            }
+
+            File directory = new File(uploadDir);
+            if (!directory.exists() && !directory.mkdirs()) {
+                throw new BadRequestException("Could not create upload directory");
+            }
+
+            String oldProfilePicture = user.getProfilePicture();
+
+            String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+            String extension = "";
+
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            String fileName = UUID.randomUUID() + extension;
+            File destination = new File(directory, fileName);
+
+            try {
+                file.transferTo(destination);
+            } catch (IOException e) {
+                throw new BadRequestException("Failed to upload profile picture: " + e.getMessage());
+            }
+
+            user.setProfilePicture(fileName);
+
+            if (oldProfilePicture != null && !oldProfilePicture.isBlank()) {
+                File oldFile = new File(directory, oldProfilePicture);
+                if (oldFile.exists()) {
+                    oldFile.delete();
+                }
+            }
         }
 
         userRepository.save(user);
@@ -123,8 +181,40 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Profile updated successfully");
         response.put("email", user.getEmail());
+        response.put("profilePictureUrl", "/profile/picture/" + user.getEmail());
         return response;
     }
+
+    @Override
+    public ResponseEntity<byte[]> getProfilePicture(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        if (user.getProfilePicture() == null || user.getProfilePicture().isBlank()) {
+            throw new BadRequestException("Profile picture not found");
+        }
+
+        File file = new File(uploadDir, user.getProfilePicture());
+
+        if (!file.exists()) {
+            throw new BadRequestException("Profile picture file not found");
+        }
+
+        try {
+            byte[] imageBytes = Files.readAllBytes(file.toPath());
+
+            String fileName = user.getProfilePicture().toLowerCase();
+            MediaType mediaType = fileName.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, mediaType.toString())
+                    .body(imageBytes);
+
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to read profile picture");
+        }
+    }
+
     private String generateTempPassword() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
         SecureRandom random = new SecureRandom();
@@ -157,7 +247,7 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
-    @Override
+   /* @Override
     public Map<String, Object> uploadProfilePicture(String email, MultipartFile file) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
@@ -219,5 +309,5 @@ public class AuthServiceImpl implements AuthService {
         response.put("email", user.getEmail());
         response.put("profilePicture", user.getProfilePicture());
         return response;
-    }
+    } */
 }

@@ -2,8 +2,8 @@ package com.focusflow.controller;
 
 import com.focusflow.dto.ProfileResponse;
 import com.focusflow.dto.ResetPasswordRequest;
-import com.focusflow.dto.UpdateProfileRequest;
 import com.focusflow.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,16 +24,17 @@ public class ProfileController {
         return authService.getProfile(email);
     }
 
-    @PutMapping
+    @PutMapping(consumes = {"multipart/form-data"})
     public Map<String, Object> updateProfile(@RequestParam String email,
-                                             @RequestBody UpdateProfileRequest request) {
-        return authService.updateProfile(email, request);
+                                             @RequestParam(required = false) String firstName,
+                                             @RequestParam(required = false) String lastName,
+                                             @RequestParam(value = "file", required = false) MultipartFile file) {
+        return authService.updateProfile(email, firstName, lastName, file);
     }
 
-    @PostMapping("/upload-picture")
-    public Map<String, Object> uploadProfilePicture(@RequestParam String email,
-                                                    @RequestParam("file") MultipartFile file) {
-        return authService.uploadProfilePicture(email, file);
+    @GetMapping("/picture/{email}")
+    public ResponseEntity<byte[]> getProfilePicture(@PathVariable String email) {
+        return authService.getProfilePicture(email);
     }
 
     @PutMapping("/change-password")

@@ -4,22 +4,16 @@ public class ProfileResponse {
     private String firstName;
     private String lastName;
     private String email;
-    private String profilePicture;
+    private String profilePictureUrl;
 
     public ProfileResponse() {
     }
 
-    public ProfileResponse(String firstName, String lastName, String email) {
+    public ProfileResponse(String firstName, String lastName, String email, String profilePictureUrl) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-    }
-
-    public ProfileResponse(String firstName, String lastName, String email, String profilePicture) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.profilePicture = profilePicture;
+        this.profilePictureUrl = profilePictureUrl;
     }
 
     public String getFirstName() {
@@ -34,7 +28,7 @@ public class ProfileResponse {
         return email;
     }
 
-    public String getProfilePicture() {
-        return profilePicture;
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
     }
 }
