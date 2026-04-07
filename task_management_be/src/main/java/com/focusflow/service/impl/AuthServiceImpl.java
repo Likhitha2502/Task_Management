@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, Object> updateProfile(String email, String firstName, String lastName, MultipartFile file) {
+    public Map<String, Object> updateProfile(String email, String firstName, String lastName, MultipartFile profilePicture) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
@@ -130,8 +130,8 @@ public class AuthServiceImpl implements AuthService {
             user.setLastName(lastName);
         }
 
-        if (file != null && !file.isEmpty()) {
-            String contentType = file.getContentType();
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            String contentType = profilePicture.getContentType();
             if (contentType == null ||
                     !(contentType.equals("image/jpeg") ||
                             contentType.equals("image/png") ||
@@ -139,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new BadRequestException("Only JPG, JPEG, and PNG files are allowed");
             }
 
-            if (file.getSize() > 5 * 1024 * 1024) {
+            if (profilePicture.getSize() > 5 * 1024 * 1024) {
                 throw new BadRequestException("File size must be 5MB or less");
             }
 
@@ -150,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
 
             String oldProfilePicture = user.getProfilePicture();
 
-            String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+            String originalFilename = StringUtils.cleanPath(profilePicture.getOriginalFilename());
             String extension = "";
 
             if (originalFilename != null && originalFilename.contains(".")) {
@@ -161,7 +161,7 @@ public class AuthServiceImpl implements AuthService {
             File destination = new File(directory, fileName);
 
             try {
-                file.transferTo(destination);
+                profilePicture.transferTo(destination);
             } catch (IOException e) {
                 throw new BadRequestException("Failed to upload profile picture: " + e.getMessage());
             }
