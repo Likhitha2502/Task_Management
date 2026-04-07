@@ -13,7 +13,8 @@ export const useSignUpFormStyles = makeStyles({ name: 'SignUpForm' })({
     marginBottom: '16px',
     display: 'flex',
     flexDirection: 'row',
-    flexWrap: 'nowrap',
+    flexWrap: 'wrap',
+    gap: '12px',
   },
   emailField: {
     marginBottom: '16px',
