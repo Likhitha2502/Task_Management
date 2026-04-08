@@ -10,5 +10,6 @@ export interface User {
 export interface ProfilePayload {
     firstName: string;
     lastName: string;
-    profilePicture: File | string;
+    profilePictureUrl?: string;
+    profilePicture?: File;
 };

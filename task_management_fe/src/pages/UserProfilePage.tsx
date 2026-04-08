@@ -1,92 +1,174 @@
-import { equals } from 'ramda';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { equals, isNil } from 'ramda';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import {
   Box, Button, Typography, TextField, Avatar,
   IconButton, CircularProgress,
 } from '@mui/material';
-import { CameraAlt } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
+
+import { boundActions, selectors } from '../app/index';
 import { ChangePasswordModal } from '../components/PasswordChangeModal';
 
+import { AppLayout } from './AppLayout';
+import { ProfilePictureDialog } from './ProfilePicturedialog';
 import {
   useUserProfileStyles,
   fieldSx,
 } from './UserProfilePage.styles';
-import { AppLayout } from './AppLayout';
-import { boundActions, selectors } from '../app/index';
 
 const CORAL = '#D35F55';
 
 export const UserProfilePage = () => {
+  // const { classes } = useUserProfileStyles();
+
+  // // 1. SELECTORS
+  // const currentUser = useSelector(selectors.profile.userProfile, equals);
+  // const loggedInUser = useSelector(selectors.auth.loggedInUser);
+  // const profileIcon = useSelector(selectors.profile.userIcon); // The binary from API
+
+  // // 2. STATE MANAGEMENT
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  // const [pendingFile, setPendingFile] = useState<File | null | undefined>(undefined);
+  // const [saving, setSaving] = useState(false);
+  // const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+
+  // const [form, setForm] = useState({
+  //   firstName: currentUser?.firstName ?? '',
+  //   lastName: currentUser?.lastName ?? '',
+  //   profilePicture: currentUser?.profilePicture ?? profileIcon,
+  // });
+
+  // const handleModalConfirm = (file: File | null) => {
+  //   setPendingFile(file);
+  //   if (pendingUrl) URL.revokeObjectURL(pendingUrl);
+
+  //   if (file instanceof File) {
+  //     setPendingUrl(URL.createObjectURL(file));
+  //   } else {
+  //     setPendingUrl(null);
+  //   }
+  // };
+  // const handleSave = () => {
+  //   // Dispatch a plain serializable object instead of FormData
+  //   const payload = !isNil(pendingFile) ? {
+  //     firstName: form?.firstName,
+  //     lastName: form?.lastName, profilePicture: pendingFile
+  //   } : {
+  //     firstName: form?.firstName,
+  //     lastName: form?.lastName,
+  //   };
+
+  //   boundActions.profile.updateUserProfileRequest({ values: payload, email: loggedInUser?.email });
+  // };
+
+  // const initials = `${currentUser?.firstName?.[0] || ''}${currentUser?.lastName?.[0] || ''}` || 'U';
+
+  // useEffect(() => {
+  //   boundActions.profile.fetchUserProfilePictureRequest({
+  //     email: loggedInUser?.email as string
+  //   });
+  //   boundActions.profile.fetchUserProfileRequest({
+  //     email: loggedInUser?.email as string
+  //   })
+  // }, []);
+
+  // // Sync form state when currentUser data is loaded from Redux
+  // useEffect(() => {
+  //   if (currentUser) {
+  //     setForm({
+  //       firstName: currentUser.firstName ?? '',
+  //       lastName: currentUser.lastName ?? '',
+  //       profilePicture: profileIcon ?? '',
+  //     });
+  //   }
+  // }, [currentUser, profileIcon]); // This runs every time currentUser changes
+
   const { classes } = useUserProfileStyles();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentUser = useSelector(selectors.profile.userProfile, equals);
-  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const loggedInUser = useSelector(selectors.auth.loggedInUser);
+  const profileIcon = useSelector(selectors.profile.userIcon);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+
+  // Initialize with empty strings
   const [form, setForm] = useState({
-    firstName: currentUser?.firstName ?? '',
-    lastName: currentUser?.lastName ?? '',
-    profilePicture: currentUser?.profilePicture ?? ''
+    firstName: '',
+    lastName: '',
   });
 
-  const initials = form.firstName && form.lastName
-    ? `${form.firstName[0]}${form.lastName[0]}`.toUpperCase()
-    : (currentUser?.email?.[0] ?? 'U').toUpperCase();
+  // 1. Ref to track if we have already filled the form with DB data
+  const hasInitialized = useRef(false);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleAvatarChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setAvatarPreview(reader.result as string);
-    reader.readAsDataURL(file);
-  }, []);
-
-  const handleSave = useCallback(() => {
-    setSaving(true);
-    boundActions.profile.updateUserProfileRequest({ values: { ...form }, email: loggedInUser?.email as string });
-    setTimeout(() => setSaving(false), 800);
-  }, [form]);
-
+  // 2. Load profile data only ONCE when currentUser becomes available
   useEffect(() => {
-    boundActions.profile.fetchUserProfileRequest({
-      email: loggedInUser?.email as string
-    })
-  }, []);
-
-  // Sync form state when currentUser data is loaded from Redux
-  useEffect(() => {
-    if (currentUser) {
+    if (currentUser && !hasInitialized.current) {
       setForm({
         firstName: currentUser.firstName ?? '',
         lastName: currentUser.lastName ?? '',
-        profilePicture: currentUser.profilePicture ?? '',
       });
+      hasInitialized.current = true;
     }
-  }, [currentUser]); // This runs every time currentUser changes
+  }, [currentUser]);
+
+  // 3. Fetch initial data on mount
+  useEffect(() => {
+    const email = loggedInUser?.email;
+    if (email) {
+      boundActions.profile.fetchUserProfilePictureRequest({ email });
+      boundActions.profile.fetchUserProfileRequest({ email });
+    }
+  }, [loggedInUser?.email]);
+
+  // 4. Handle Typing (Local State only)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleModalConfirm = (file: File | null) => {
+    setPendingFile(file);
+    if (pendingUrl) URL.revokeObjectURL(pendingUrl);
+    if (file instanceof File) {
+      setPendingUrl(URL.createObjectURL(file));
+    } else {
+      setPendingUrl(null);
+    }
+  };
+
+  const handleSave = () => {
+    setSaving(true);
+    const payload: any = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+    };
+
+    // If user deleted (null) or picked a file (File), include it
+    if (pendingFile !== undefined) {
+      payload.profilePicture = pendingFile;
+    }
+
+    boundActions.profile.updateUserProfileRequest({
+      values: payload,
+      email: loggedInUser?.email as string
+    });
+
+    // Stop loader after a brief delay
+    setTimeout(() => setSaving(false), 1000);
+  };
+
+  const initials = `${currentUser?.firstName?.[0] || ''}${currentUser?.lastName?.[0] || ''}` || 'U';
 
   return (
     // activeNav=null means neither Tasks nor Progress is highlighted
     <AppLayout>
 
-      {/* ── Back button + Title inside content ────────────────────────────
-      <Box className={classes.pageHeader}>
-        <button className={classes.backBtn} onClick={() => navigate(ROUTES.tasks)}>
-          ← Back
-        </button>
-        <Typography className={classes.pageTitle}>User Profile</Typography>
-      </Box> */}
-
-      {/* ── Two-column grid ─────────────────────────────────────────────── */}
       <Box className={classes.grid}>
 
         {/* Left — Profile Form */}
@@ -94,62 +176,55 @@ export const UserProfilePage = () => {
           <Typography className={classes.cardTitle}>Profile</Typography>
           <Typography className={classes.cardSubtitle}>Update your personal information</Typography>
 
-          {/* Avatar */}
           <Box className={classes.avatarWrapper}>
-            <Avatar src={avatarPreview ?? undefined} className={classes.avatarLarge}>
-              {!avatarPreview && initials}
+            <Avatar
+              src={pendingFile === null ? undefined : (pendingUrl || profileIcon || undefined)}
+              className={classes.avatarLarge}
+            >
+              {initials}
             </Avatar>
-            <IconButton className={classes.cameraBtn} onClick={() => fileInputRef.current?.click()}>
-              <CameraAlt style={{ fontSize: 14, color: CORAL }} />
+            <IconButton className={classes.cameraBtn} onClick={() => setIsModalOpen(true)}>
+              <Edit style={{ fontSize: 14, color: CORAL }} />
             </IconButton>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleAvatarChange}
-            />
           </Box>
 
-          {/* First + Last name */}
+          <ProfilePictureDialog
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            initials={initials}
+            currentImage={pendingFile === null ? null : (pendingUrl || profileIcon)}
+            onConfirm={handleModalConfirm}
+          />
+
           <Box className={classes.fieldRow}>
             <Box>
               <Typography className={classes.fieldLabel}>First name</Typography>
-              <TextField fullWidth name="firstName" size="small"
-                placeholder="First name" value={form.firstName}
-                onChange={handleChange} sx={fieldSx} />
+              <TextField
+                fullWidth
+                name="firstName"
+                size="small"
+                value={form.firstName}
+                onChange={handleInputChange} // Fix: Use local handler
+                sx={fieldSx}
+              />
             </Box>
             <Box>
               <Typography className={classes.fieldLabel}>Last name</Typography>
-              <TextField fullWidth name="lastName" size="small"
-                placeholder="Last name" value={form.lastName}
-                onChange={handleChange} sx={fieldSx} />
+              <TextField
+                fullWidth
+                name="lastName"
+                size="small"
+                value={form.lastName}
+                onChange={handleInputChange} // Fix: Use local handler
+                sx={fieldSx}
+              />
             </Box>
           </Box>
 
-          {/* Email */}
-          <Box className={classes.fieldBox}>
-            <Typography className={classes.fieldLabel}>Email</Typography>
-            <TextField fullWidth name="email" type="email" size="small"
-              placeholder="Email address" value={loggedInUser?.email as string}
-              onChange={handleChange} sx={fieldSx} disabled={true} />
-          </Box>
-
-          {/* Save — bottom right */}
-          <Box style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                backgroundColor: CORAL, color: '#fff', borderRadius: '8px',
-                textTransform: 'none', fontFamily: 'Georgia, serif',
-                fontWeight: 600, fontSize: '14px', padding: '9px 28px',
-              }}
-            >
-              {saving ? <CircularProgress size={16} style={{ color: '#fff' }} /> : 'Save'}
-            </Button>
-          </Box>
+          {/* Save Button triggers the API call ONLY when clicked */}
+          <Button onClick={handleSave}>
+            {saving ? <CircularProgress size={16} /> : 'Save'}
+          </Button>
         </Box>
 
         {/* Right — Change Password */}

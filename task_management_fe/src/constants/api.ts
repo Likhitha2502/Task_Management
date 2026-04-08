@@ -14,6 +14,7 @@ export const api = {
   profile: {
     changePassword: `${BASE.profile}/change-password`,
     userInfo: (email: string) => `${BASE.profile}/${email}`,
+    userIcon: (email: string) => `${BASE.profile}/picture/${email}`,
     updateUserInfo: (email: string) => `${BASE.profile}?email=${email}`,
   }
 };
