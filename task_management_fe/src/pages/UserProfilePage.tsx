@@ -222,7 +222,11 @@ export const UserProfilePage = () => {
           </Box>
 
           {/* Save Button triggers the API call ONLY when clicked */}
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} style={{
+            borderColor: CORAL, color: CORAL, borderRadius: '8px',
+            textTransform: 'none', fontFamily: 'Georgia, serif',
+            fontWeight: 600, fontSize: '14px', padding: '9px 0',
+          }}>
             {saving ? <CircularProgress size={16} /> : 'Save'}
           </Button>
         </Box>
