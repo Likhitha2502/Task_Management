@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { createEpicMiddleware } from 'redux-observable';
 import { rootEpic } from '../features/rootEpic';
 import authReducer from '../features/auth/authSlice';
+import profileReducer from '../features/profile/profileSlice';
 
 // Typed action/state for epicMiddleware
 const epicMiddleware = createEpicMiddleware();
@@ -10,6 +11,7 @@ const epicMiddleware = createEpicMiddleware();
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
