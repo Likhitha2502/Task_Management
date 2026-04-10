@@ -25,7 +25,7 @@ public class User {
     @Column(nullable = false)
     private Boolean passwordResetRequired = false;
 
-    @Column(nullable = false)
+    @Column(name = "profile_picture")
     private String profilePicture;
 
     public Long getId() {

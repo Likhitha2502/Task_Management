@@ -5,6 +5,7 @@ import com.focusflow.entity.User;
 import com.focusflow.exception.BadRequestException;
 import com.focusflow.exception.UnauthorizedException;
 import com.focusflow.repository.UserRepository;
+import com.focusflow.security.JwtUtil;
 import com.focusflow.service.AuthService;
 import com.focusflow.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,13 +33,16 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtUtil jwtUtil;
 
     public AuthServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           EmailService emailService) {
+                           EmailService emailService,
+                           JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Value("${app.upload.dir}")
@@ -72,11 +76,14 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("Invalid credentials");
         }
+        String token = jwtUtil.generateToken(user.getEmail());
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Login successful");
         response.put("email", user.getEmail());
         response.put("requiresPasswordReset", user.getPasswordResetRequired());
+        response.put("token", token);
+        response.put("tokenType", "Bearer");
         return response;
     }
 
@@ -106,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
 
         String profilePictureUrl = null;
         if (user.getProfilePicture() != null && !user.getProfilePicture().isBlank()) {
-            profilePictureUrl = "/profile/picture/" + user.getEmail();
+            profilePictureUrl = "/profile/picture";
         }
 
         return new ProfileResponse(
@@ -181,7 +188,7 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Profile updated successfully");
         response.put("email", user.getEmail());
-        response.put("profilePictureUrl", "/profile/picture/" + user.getEmail());
+        response.put("profilePictureUrl", "/profile/picture");
         return response;
     }
 
@@ -228,8 +235,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, Object> changePassword(ResetPasswordRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+    public Map<String, Object> changePassword(String email, ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
