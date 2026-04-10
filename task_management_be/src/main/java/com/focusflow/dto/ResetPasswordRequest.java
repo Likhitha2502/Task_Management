@@ -1,17 +1,9 @@
 package com.focusflow.dto;
 
 public class ResetPasswordRequest {
-    private String email;
     private String currentPassword;
     private String newPassword;
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getCurrentPassword() {
         return currentPassword;
