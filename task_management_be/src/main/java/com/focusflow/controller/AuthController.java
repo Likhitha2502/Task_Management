@@ -6,6 +6,7 @@ import com.focusflow.dto.RegisterRequest;
 import com.focusflow.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,4 +33,10 @@ public class AuthController {
     public Map<String, Object> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         return authService.forgotPassword(request);
     }
-}
+
+    @PostMapping("/logout")
+    public Map<String, Object> logout() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Logout successful");
+        return response;
+    }}
