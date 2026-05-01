@@ -16,5 +16,12 @@ export const api = {
     userInfo: (email: string) => `${BASE.profile}/${email}`,
     userIcon: (email: string) => `${BASE.profile}/picture/${email}`,
     updateUserInfo: (email: string) => `${BASE.profile}?email=${email}`,
-  }
+  },
+  tasks: {
+    getAll: '/tasks',
+    create: '/tasks',
+    getById: (id: number) => `/tasks/${id}`,
+    update: (id: number) => `/tasks/${id}`,
+    delete: (id: number) => `/tasks/${id}`,
+  },
 };

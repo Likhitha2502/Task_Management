@@ -1,8 +1,6 @@
+import { CORAL, CORAL_LIGHT } from '@/models/color';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
-
-const CORAL = '#D35F55';
-const CORAL_LIGHT = '#fdf1f0';
 
 export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
  // ── Page header inside content ─────────────────────────────────────────────

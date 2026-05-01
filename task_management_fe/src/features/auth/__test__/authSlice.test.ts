@@ -46,12 +46,19 @@ const mockLoginPayload: LoginPayload = {
 
 const initialState: AuthState = {
   currentUser: null,
+  loggedInUser: null,
   isAuthorized: false,
   register: false,
-  loading: false,
+  mustChangePassword: false,
+  loading: {
+    forgotPassword: false,
+    changePassword: false,
+  },
   accessToken: null,
   error: null,
   statuses: {
+    register: RequestStatus.Idle,
+    passwordChangeStatus: RequestStatus.Idle,
     login: RequestStatus.Idle,
     logout: RequestStatus.Idle,
   },

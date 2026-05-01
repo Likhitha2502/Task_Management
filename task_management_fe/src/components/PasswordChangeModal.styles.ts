@@ -1,7 +1,6 @@
+import { CORAL } from '@/models/color';
 import { Dialog, styled } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-
-const CORAL = '#D35F55';
 
 export const StyledDialog = styled(Dialog)({
   '& .MuiDialog-paper': {

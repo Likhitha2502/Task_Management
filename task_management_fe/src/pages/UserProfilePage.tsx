@@ -11,7 +11,7 @@ import { boundActions, selectors } from '../app/index';
 import { ChangePasswordModal } from '../components/PasswordChangeModal';
 
 import { AppLayout } from './AppLayout';
-import { ProfilePictureDialog } from './ProfilePicturedialog';
+import { ProfilePictureDialog } from './ProfilePictureDialog';
 import {
   useUserProfileStyles,
   fieldSx,

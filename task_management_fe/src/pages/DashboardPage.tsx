@@ -1,6 +1,6 @@
 // src/pages/DashboardPage.tsx
 import { AppLayout } from './AppLayout';
-import { TaskLists } from './TasksList';
+import { TasksList } from './Tasks/TasksList';
 import { TasksProgress } from './TaskProgress';
 
 type DashboardView = 'tasks' | 'progress';
@@ -11,7 +11,7 @@ type DashboardPageProps = {
 
 export const DashboardPage = ({ view }: DashboardPageProps) => (
   <AppLayout>
-    {view === 'tasks'    && <TaskLists />}
+    {view === 'tasks'    && <TasksList />}
     {view === 'progress' && <TasksProgress />}
   </AppLayout>
 );

@@ -1,6 +1,5 @@
+import { CORAL } from '@/models/color';
 import { makeStyles } from 'tss-react/mui';
-
-const CORAL = '#D35F55';
 
 export const usePasswordFieldStyles = makeStyles({ name: 'PasswordField' })({
   wrapper: {

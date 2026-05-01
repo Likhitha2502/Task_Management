@@ -1,4 +1,3 @@
-// src/services/http.ts
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { jwtService } from './jwt';
 
@@ -9,18 +8,13 @@ const http = axios.create({
   },
 });
 
-// ─── Request Interceptor ──────────────────────────────────────────────────────
-// Attaches JWT to every outgoing request
-
 http.interceptors.request.use(
   (config) => {
-    //commented until BE modified for token
-    // const token = jwtService.getToken();
-    // if (token && config.headers) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = jwtService.getToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-    // Logs every outgoing request in dev so you can confirm it fired
     if (import.meta.env.DEV) {
       console.log(`[HTTP] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, {
         headers: config.headers,

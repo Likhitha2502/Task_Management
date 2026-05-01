@@ -7,6 +7,7 @@ import { ROUTES } from './constants';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import UserProfilePage from './pages/UserProfilePage';
+import { jwtService } from './services/jwt';
 
 const theme = createTheme({
   palette: {
@@ -29,7 +30,8 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const isLoginSuccess = useSelector(selectors.auth.isLoginSuccess);
-  return isLoginSuccess
+  const hasAccessToken       = !!jwtService.getToken(); 
+  return (isLoginSuccess || hasAccessToken)
     ? <>{children}</>
     : <Navigate to={ROUTES.auth.login} replace />;
 };

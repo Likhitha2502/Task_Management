@@ -1,7 +1,6 @@
+import { CORAL, CORAL_LIGHT } from '@/models/color';
 import { makeStyles } from 'tss-react/mui';
 
-const CORAL = '#D35F55';
-const CORAL_LIGHT = '#fdf1f0';
 const SIDEBAR_WIDTH = 220;
 const HEADER_HEIGHT = 71;
 

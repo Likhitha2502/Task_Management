@@ -11,9 +11,11 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  email: string;
-  message: string;
+  message:              string;
+  email:                string;
   requiresPasswordReset: boolean;
+  token:                string;
+  tokenType:            string;
 }
 
 export interface ChangePassword {

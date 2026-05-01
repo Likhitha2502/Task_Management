@@ -56,9 +56,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           >
             <span className={classes.navIcon}>☰</span>
             My Tasks
-            <span className={classes.navBadge} style={{ opacity: activeNav === 'tasks' ? 1 : 0.5 }}>
-              0
-            </span>
           </button>
 
           {/* Progress — highlighted when pathname === /progress */}

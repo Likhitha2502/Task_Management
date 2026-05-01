@@ -11,7 +11,7 @@ import { getResponseError } from '@/utils/response';
 
 export interface ProfileState {
   userProfile: User | null;
-  imageIcon: User['profilePictureUrl'] | null;
+  imageIcon: User['profilePicture'] | null;
   error: string | null;
   loading: {
     fetch: boolean;

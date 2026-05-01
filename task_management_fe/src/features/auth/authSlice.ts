@@ -8,6 +8,7 @@ import { User, RegisterPayload, RequestStatus, LoginPayload, ChangePassword, Log
 import http from '../../services/http';
 import { getResponseError } from '@/utils/response';
 import { tempAuthService } from '@/utils/storage';
+import { jwtService } from '@/services/jwt';
 
 export interface AuthState {
   currentUser: User | null;
@@ -81,6 +82,7 @@ const authSlice = createSlice({
     loginSuccess(state, action: PayloadAction<LoginResponse>) {
       state.loggedInUser = action.payload;
       state.isAuthorized = true;
+      state.accessToken = action.payload.token;
       state.statuses.login = RequestStatus.Success;
       state.error = null;
     },
@@ -182,7 +184,8 @@ const loginEpic: Epic = (action$) =>
     switchMap((action: { type: string; payload: LoginPayload }) =>
       from(http.post<LoginResponse>(api.auth.login, action.payload)).pipe(
         mergeMap((response) => {
-          const { requiresPasswordReset } = response.data;  // ← check flag on login
+          const { token, requiresPasswordReset } = response.data;  // ← check flag on login
+          jwtService.setToken(token);
           return [
             authSliceActions.loginSuccess(response.data),
             authSliceActions.setChangePasswordFlag(requiresPasswordReset) // ← push to Redux state

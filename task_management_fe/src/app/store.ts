@@ -4,6 +4,7 @@ import { createEpicMiddleware } from 'redux-observable';
 import { rootEpic } from '../features/rootEpic';
 import authReducer from '../features/auth/authSlice';
 import profileReducer from '../features/profile/profileSlice';
+import tasksReducer from '../features/tasks/tasksSlice';
 
 // Typed action/state for epicMiddleware
 const epicMiddleware = createEpicMiddleware();
@@ -12,6 +13,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     profile: profileReducer,
+    tasks: tasksReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
