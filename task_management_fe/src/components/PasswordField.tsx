@@ -1,43 +1,39 @@
-import React, { useState } from 'react';
-import { InputAdornment, IconButton, TextField, Typography, TextFieldProps } from '@mui/material';
+// src/components/PasswordField.tsx
+import { useField } from 'formik';
+import { useState } from 'react';
+import { TextField, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { usePasswordFieldStyles } from './PasswordField.styles';
 
-interface PasswordFieldProps extends Omit<TextFieldProps, 'type'> {
-  label: string;
-}
+type PasswordFieldProps = {
+  name:        string;
+  label?:      string;
+  placeholder?: string;
+  className?:  string;
+};
 
-export const PasswordField = ({ label, sx, className, ...props }: PasswordFieldProps) => {
-  const { classes, cx } = usePasswordFieldStyles();
-  const [showPassword, setShowPassword] = useState(false);
+export const PasswordField = ({ name, placeholder, className }: PasswordFieldProps) => {
+  const [field, meta] = useField(name);   // ← connects to Formik by name
+  const [visible, setVisible] = useState(false);
 
   return (
-    <div className={classes.wrapper}>
-      <Typography className={classes.label}>{label}</Typography>
-      <TextField
-        {...props}
-        className={cx(classes.textField, className)}
-        sx={sx}
-        fullWidth
-        size="small"
-        type={showPassword ? 'text' : 'password'}
-        slotProps={{
-          input: {
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={() => setShowPassword(!showPassword)}
-                  edge="end"
-                  size="small"
-                  className={classes.visibilityButton}
-                >
-                  {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
-    </div>
+    <TextField
+      {...field}                           // ← value, onChange, onBlur all wired
+      fullWidth
+      size="small"
+      type={visible ? 'text' : 'password'}
+      placeholder={placeholder}
+      className={className}
+      error={meta.touched && !!meta.error}
+      helperText={meta.touched && meta.error}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton onClick={() => setVisible((v) => !v)} edge="end" size="small">
+              {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
   );
 };

@@ -8,6 +8,7 @@ import { User, RegisterPayload, RequestStatus, LoginPayload, ChangePassword, Log
 import http from '../../services/http';
 import { getResponseError } from '@/utils/response';
 import { jwtService } from '@/services/jwt';
+import { tempAuthService } from '@/utils/storage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -156,6 +157,7 @@ const authSlice = createSlice({
       state.isAuthorized           = false;
       state.accessToken            = null;
       state.loading.logout         = false;
+      state.statuses.login  = RequestStatus.Idle;
       state.statuses.logout        = RequestStatus.Failure;
       state.error                  = action.payload;
     },
