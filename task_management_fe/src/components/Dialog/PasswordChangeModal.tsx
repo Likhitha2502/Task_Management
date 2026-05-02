@@ -9,8 +9,8 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { boundActions, selectors } from '@/app/index';
-import { PasswordField } from './PasswordField';
-import { StyledDialog, useChangePasswordModalStyles } from './PasswordChangeModal.styles';
+import { PasswordField } from '../Field/PasswordField';
+import { StyledDialog, useChangePasswordModalStyles } from '../Dialog/PasswordChangeModal.styles';
 
 type ChangePasswordModalProps = {
   open: boolean;
@@ -26,7 +26,6 @@ export const ChangePasswordModal = ({ open, onClose, forced }: ChangePasswordMod
   const { classes } = useChangePasswordModalStyles();
   const passwordChanged = useSelector(selectors.auth.passwordChanged);
   const error = useSelector(selectors.auth.isError);
-  const loggedInUser = useSelector(selectors.auth.loggedInUser);
 
   const [form, setForm] = useState<FormState>({
     currentPassword: '',

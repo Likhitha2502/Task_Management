@@ -1,13 +1,14 @@
 import { createDraftSafeSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { combineEpics, Epic, ofType } from 'redux-observable';
 import { from, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { RootState } from '../../app/store';
 import { api } from '@/constants/api';
 import { User, ProfilePayload } from '../../models';
 import http from '../../services/http';
 import { getResponseError } from '@/utils/response';
+import { profileFile } from '@/utils/profileFile';
 
 export interface ProfileState {
   userProfile: User | null;
@@ -65,7 +66,7 @@ const profileSlice = createSlice({
       state.error = action.payload;
     },
 
-    updateUserProfileRequest(state, _action: PayloadAction<{ email: string; values: ProfilePayload }>) {
+    updateUserProfileRequest(state, _action: PayloadAction<{ values: ProfilePayload }>) {
       state.loading.update = true;
       state.status = null;
       state.error = null;
@@ -121,37 +122,20 @@ const fetchUserProfileEpic: Epic = (action$) =>
     )
   );
 
-// const fetchUserProfilePictureEpic: Epic = (action$) =>
-//   action$.pipe(
-//     ofType(profileSliceActions.fetchUserProfilePictureRequest.type),
-//     switchMap(({ payload }: { type: string; payload: { email: string } }) =>
-//       from(
-//         http.get(api.profile.userIcon(payload.email), {
-//           responseType: 'blob',
-//         })
-//       ).pipe(
-//         map((response) => 
-//           profileSliceActions.fetchUserProfilePictureSuccess(response.data)
-//         ),
-//         catchError((error) => {
-//           const message = getResponseError(error) || 'Failed to fetch user profile picture.';
-//           return of(profileSliceActions.fetchUserProfilePictureFailure(String(message)));
-//         })
-//       )
-//     )
-//   );
-
 const fetchUserProfilePictureEpic: Epic = (action$) =>
   action$.pipe(
     ofType(profileSliceActions.fetchUserProfilePictureRequest.type),
-    switchMap(({}) =>
+    switchMap(() =>
       from(http.get(api.profile.userIcon, { responseType: 'blob' })).pipe(
         switchMap((response) =>
-          new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(response.data);
-          })
+          from(
+            new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror  = reject;
+              reader.readAsDataURL(response.data);
+            })
+          )
         ),
         map((base64String) => profileSliceActions.fetchUserProfilePictureSuccess(base64String)),
         catchError((error) => of(profileSliceActions.fetchUserProfilePictureFailure(error.message)))
@@ -162,21 +146,25 @@ const fetchUserProfilePictureEpic: Epic = (action$) =>
 const updateUserProfileEpic: Epic = (action$) =>
   action$.pipe(
     ofType(profileSliceActions.updateUserProfileRequest.type),
-    switchMap(({ payload }: { type: string; payload: { values: ProfilePayload; email: string } }) => {
+    switchMap(({ payload }: { type: string; payload: { values: ProfilePayload } }) => {
       const formData = new FormData();
       formData.append('firstName', payload.values.firstName);
       formData.append('lastName', payload.values.lastName);
 
-      if (payload.values.profilePicture) {
-        formData.append('profilePicture', payload.values.profilePicture);
+      const file = profileFile.get();
+      if (file instanceof File) {
+        formData.append('profilePicture', file, file.name); // ← raw File, BE gets proper binary
+      } else if (file === null) {
+        formData.append('profilePicture', '');              // ← signal deletion
       }
 
+      profileFile.clear();
       return from(
-        http.put<User>(api.profile.updateUserInfo(payload.email), formData, {
+        http.put<User>(api.profile.userInfo, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }, // ← override JSON default
         })
       ).pipe(
-        map((response) => (profileSliceActions.updateUserProfileSuccess(response.data), profileSliceActions.fetchUserProfileRequest({ email: payload.email }))),
+        mergeMap((response) => of (profileSliceActions.updateUserProfileSuccess(response.data), profileSliceActions.fetchUserProfileRequest())),
         catchError((error) => {
           const message = getResponseError(error) || 'Failed to update user profile.';
           return of(profileSliceActions.updateUserProfileFailure(String(message)));

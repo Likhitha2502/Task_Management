@@ -1,7 +1,7 @@
 // src/pages/DashboardPage.tsx
 import { AppLayout } from './AppLayout';
 import { TasksList } from './Tasks/TasksList';
-import { TasksProgress } from './TaskProgress';
+import { TasksProgress } from './Progress/TaskProgress';
 
 type DashboardView = 'tasks' | 'progress';
 

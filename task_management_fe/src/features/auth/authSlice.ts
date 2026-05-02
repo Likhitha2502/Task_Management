@@ -88,12 +88,14 @@ const authSlice = createSlice({
       state.isAuthorized         = null;
       state.error                = null;
       state.statuses.login       = RequestStatus.Pending;
+      state.statuses.logout    = RequestStatus.Idle;
     },
     loginSuccess(state, action: PayloadAction<LoginResponse>) {
       state.loggedInUser         = action.payload;
       state.isAuthorized         = true;
       state.accessToken          = action.payload.token;
       state.statuses.login       = RequestStatus.Success;
+      state.statuses.logout    = RequestStatus.Idle;
       state.error                = null;
     },
     loginFailure(state, action: PayloadAction<string>) {
@@ -204,7 +206,7 @@ export const selectors = {
   passwordChanged:     createDraftSafeSelector(selectAuthState, (auth) => auth.statuses.passwordChangeStatus === RequestStatus.Success),
   mustChangePassword:  createDraftSafeSelector(selectAuthState, (auth) => auth.mustChangePassword),
   isLogoutLoading:     createDraftSafeSelector(selectAuthState, (auth) => auth.loading.logout),
-  isLoggedOut:         createDraftSafeSelector(selectAuthState, (auth) => auth.statuses.logout === RequestStatus.Success),
+  isLoggedOut:         createDraftSafeSelector(selectAuthState, (auth) => auth.statuses.logout === RequestStatus.Success && !auth.isAuthorized),
 };
 
 // ─── Epics ────────────────────────────────────────────────────────────────────

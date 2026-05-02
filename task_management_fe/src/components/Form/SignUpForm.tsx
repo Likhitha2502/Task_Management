@@ -2,15 +2,12 @@
 import {
   Box, Button, TextField, Typography, Grid,
 } from '@mui/material';
-import { useSignUpFormStyles } from './SignUpForm.styles';
-import { useCallback, useState } from 'react';
 import { equals, isNil } from 'ramda';
+import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { boundActions } from '../app/boundActions';  // ← only import needed
-
+import { useSignUpFormStyles } from '../../components/Form/SignUpForm.styles';
+import { boundActions } from '../../app/boundActions';
 import { selectors } from '@/app/selectors';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type SignUpFormProps = {
   onBackToLogin: () => void;

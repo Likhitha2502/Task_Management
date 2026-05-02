@@ -4,9 +4,9 @@ import { useSelector } from 'react-redux';
 
 import { selectors } from './app/index';
 import { ROUTES } from './constants';
-import LoginPage from './pages/LoginPage';
+import LoginPage from './pages/Login/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import UserProfilePage from './pages/UserProfilePage';
+import UserProfilePage from './pages/Profile/UserProfilePage';
 import { jwtService } from './services/jwt';
 import { useEffect } from 'react';
 
@@ -31,13 +31,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const isLoginSuccess = useSelector(selectors.auth.isLoginSuccess);
-  const isAuthorized   = useSelector(selectors.auth.isAuthorized);
   const hasAccessToken = !!jwtService.getToken();
-
-  // isAuthorized === false means logout has cleared state — don't fall back to token
-  if (isAuthorized === false && !isLoginSuccess) {
-    return <Navigate to={ROUTES.auth.login} replace />;
-  }
 
   return (isLoginSuccess || hasAccessToken)
     ? <>{children}</>

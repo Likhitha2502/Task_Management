@@ -1,7 +1,7 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useForgotPasswordFormStyles } from './ForgotPasswordForm.styles';
 import { useCallback, useState } from 'react';
-import { boundActions } from '../app/index';
+import { boundActions } from '../../app/index';
 
 export const ForgotPasswordForm = ({ onBackToLogin }: any) => {
   const { classes } = useForgotPasswordFormStyles();

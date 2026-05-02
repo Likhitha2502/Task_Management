@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { LoginForm } from '../components/LoginForm';
-import { SignUpForm } from '../components/SignUpForm';
-import { ForgotPasswordForm } from '../components/ForgotPasswordForm';
-import { useLoginPageStyles } from './LoginPage.styles';
-import { selectors, boundActions } from '../app/index';
+import { LoginForm, SignUpForm, ForgotPasswordForm } from '../../components/index';
+import { useLoginPageStyles } from '../../pages/Login/LoginPage.styles';
+import { selectors, boundActions } from '../../app/index';
 import { ROUTES } from '@/constants';
 
 const LoginPage = () => {

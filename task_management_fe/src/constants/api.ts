@@ -15,7 +15,6 @@ export const api = {
     changePassword: `${BASE.profile}/change-password`,
     userInfo: `${BASE.profile}`,
     userIcon: `${BASE.profile}/picture`,
-    updateUserInfo: (email: string) => `${BASE.profile}?email=${email}`,
   },
   tasks: {
     getAll: '/tasks',

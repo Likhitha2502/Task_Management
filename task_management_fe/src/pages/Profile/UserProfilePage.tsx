@@ -7,88 +7,22 @@ import {
 } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 
-import { boundActions, selectors } from '../app/index';
-import { ChangePasswordModal } from '../components/PasswordChangeModal';
-
-import { AppLayout } from './AppLayout';
+import { boundActions, selectors } from '../../app/index';
+import { ChangePasswordModal } from '../../components/Dialog/PasswordChangeModal';
+import { AppLayout } from '../AppLayout';
 import { ProfilePictureDialog } from './ProfilePictureDialog';
 import {
   useUserProfileStyles,
   fieldSx,
 } from './UserProfilePage.styles';
+import { profileFile } from '@/utils/profileFile';
 
 const CORAL = '#D35F55';
 
 export const UserProfilePage = () => {
-  // const { classes } = useUserProfileStyles();
-
-  // // 1. SELECTORS
-  // const currentUser = useSelector(selectors.profile.userProfile, equals);
-  // const loggedInUser = useSelector(selectors.auth.loggedInUser);
-  // const profileIcon = useSelector(selectors.profile.userIcon); // The binary from API
-
-  // // 2. STATE MANAGEMENT
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [pendingUrl, setPendingUrl] = useState<string | null>(null);
-  // const [pendingFile, setPendingFile] = useState<File | null | undefined>(undefined);
-  // const [saving, setSaving] = useState(false);
-  // const [changePasswordOpen, setChangePasswordOpen] = useState(false);
-
-  // const [form, setForm] = useState({
-  //   firstName: currentUser?.firstName ?? '',
-  //   lastName: currentUser?.lastName ?? '',
-  //   profilePicture: currentUser?.profilePicture ?? profileIcon,
-  // });
-
-  // const handleModalConfirm = (file: File | null) => {
-  //   setPendingFile(file);
-  //   if (pendingUrl) URL.revokeObjectURL(pendingUrl);
-
-  //   if (file instanceof File) {
-  //     setPendingUrl(URL.createObjectURL(file));
-  //   } else {
-  //     setPendingUrl(null);
-  //   }
-  // };
-  // const handleSave = () => {
-  //   // Dispatch a plain serializable object instead of FormData
-  //   const payload = !isNil(pendingFile) ? {
-  //     firstName: form?.firstName,
-  //     lastName: form?.lastName, profilePicture: pendingFile
-  //   } : {
-  //     firstName: form?.firstName,
-  //     lastName: form?.lastName,
-  //   };
-
-  //   boundActions.profile.updateUserProfileRequest({ values: payload, email: loggedInUser?.email });
-  // };
-
-  // const initials = `${currentUser?.firstName?.[0] || ''}${currentUser?.lastName?.[0] || ''}` || 'U';
-
-  // useEffect(() => {
-  //   boundActions.profile.fetchUserProfilePictureRequest({
-  //     email: loggedInUser?.email as string
-  //   });
-  //   boundActions.profile.fetchUserProfileRequest({
-  //     email: loggedInUser?.email as string
-  //   })
-  // }, []);
-
-  // // Sync form state when currentUser data is loaded from Redux
-  // useEffect(() => {
-  //   if (currentUser) {
-  //     setForm({
-  //       firstName: currentUser.firstName ?? '',
-  //       lastName: currentUser.lastName ?? '',
-  //       profilePicture: profileIcon ?? '',
-  //     });
-  //   }
-  // }, [currentUser, profileIcon]); // This runs every time currentUser changes
-
   const { classes } = useUserProfileStyles();
 
   const currentUser = useSelector(selectors.profile.userProfile, equals);
-  const loggedInUser = useSelector(selectors.auth.loggedInUser);
   const profileIcon = useSelector(selectors.profile.userIcon);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,12 +53,9 @@ export const UserProfilePage = () => {
 
   // 3. Fetch initial data on mount
   useEffect(() => {
-    const email = loggedInUser?.email;
-    if (email) {
-      boundActions.profile.fetchUserProfilePictureRequest();
-      boundActions.profile.fetchUserProfileRequest();
-    }
-  }, [loggedInUser?.email]);
+    boundActions.profile.fetchUserProfilePictureRequest();
+    boundActions.profile.fetchUserProfileRequest();
+  }, []);
 
   // 4. Handle Typing (Local State only)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,14 +80,9 @@ export const UserProfilePage = () => {
       lastName: form.lastName,
     };
 
-    // If user deleted (null) or picked a file (File), include it
-    if (pendingFile !== undefined) {
-      payload.profilePicture = pendingFile;
-    }
-
+    profileFile.set(pendingFile);
     boundActions.profile.updateUserProfileRequest({
-      values: payload,
-      email: loggedInUser?.email as string
+      values: payload
     });
 
     // Stop loader after a brief delay
@@ -192,7 +118,7 @@ export const UserProfilePage = () => {
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             initials={initials}
-            currentImage={pendingFile === null ? null : (pendingUrl  as string|| profileIcon as string)}
+            currentImage={pendingFile === null ? null : (pendingUrl as string || profileIcon as string)}
             onConfirm={handleModalConfirm}
           />
 

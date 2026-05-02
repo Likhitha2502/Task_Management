@@ -4,11 +4,11 @@ import { Form, Formik } from 'formik';
 import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 
-import { boundActions, selectors } from '../app/index';
-import { useLoginPageStyles } from '../pages/LoginPage.styles';
+import { boundActions, selectors } from '../../app/index';
+import { useLoginPageStyles } from '../../pages/Login/LoginPage.styles';
 import { useLoginFormStyles } from './LoginForm.styles';
-import { PasswordField } from './PasswordField';
-import { FormTextField } from './FormTextField';
+import { PasswordField } from '../Field/PasswordField';
+import { FormTextField } from '../Field/FormTextField';
 
 const validationSchema = Yup.object({
   email: Yup.string().email('Enter a valid email').required('Email is required'),
@@ -27,15 +27,16 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
 
   return (
     <Formik initialValues={{ email: '', password: '' }}
+    enableReinitialize
       validationSchema={validationSchema}
-      onSubmit={(values) => {
-        console.log('v', values);
+      onSubmit={(values, { setSubmitting }) => {
         boundActions.auth.loginRequest({
           email: values.email,
           password: values.password,
         });
+        setSubmitting(false);
       }}>
-      {() => (
+      {({ isValid, isSubmitting }) => (
         <Form className={classes.form}>
           {error && (
             <Typography variant="body2" className={classes.errorText}>
@@ -74,6 +75,7 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
             variant="contained"
             className={pageClasses.primaryButton}
             type="submit"
+            disabled={!isValid || isSubmitting}
           >
             Sign in to my workspace
           </Button>

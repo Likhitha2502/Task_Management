@@ -1,5 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { jwtService } from './jwt';
+import { authSliceActions } from '@/features/auth/authSlice';
+import { store } from '@/app/store';
 
 const http = axios.create({
   baseURL: 'http://localhost:8080',
@@ -62,6 +64,7 @@ http.interceptors.response.use(
       case 401:
         // Token expired or invalid — clear it and let the app redirect to login
         jwtService.removeToken();
+        store.dispatch(authSliceActions.logoutSuccess());
         break;
 
       case 409:
