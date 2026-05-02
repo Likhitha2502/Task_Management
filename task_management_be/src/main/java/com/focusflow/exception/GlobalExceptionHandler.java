@@ -25,11 +25,21 @@ public class GlobalExceptionHandler {
         return response;
     }
 
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, Object> handleInvalidJson(Exception ex) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Invalid request format (check date format or JSON)");
+        return response;
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleGeneralException(Exception ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Something went wrong");
+        response.put("message", ex.getMessage());
         return response;
     }
+
 }
