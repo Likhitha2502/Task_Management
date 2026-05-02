@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { boundActions } from '@/app/index';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { boundActions, selectors } from '@/app/index';
 import { useDashboardStyles } from './Dashboard.styles';
 import { ROUTES } from '../constants/routes';
+import { useSelector } from 'react-redux';
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -11,22 +12,23 @@ type AppLayoutProps = {
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const { classes, cx } = useDashboardStyles();
   const navigate = useNavigate();
+  const location = useLocation();
   const activeNav = location.pathname === ROUTES.tasks    ? 'tasks'
                   : location.pathname === ROUTES.progress ? 'progress'
                   : null;
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const currentUser = {
-    firstName: 'Crysta',
-    lastName: 'Stenne',
-    email: 'crystastenne@gmail.com',
-  };
+  const currentUser = useSelector(selectors.profile.userProfile);
+  const initials = currentUser?.firstName && currentUser?.lastName
+    ? `${currentUser.firstName[0]}${currentUser.lastName[0]}`.toUpperCase()
+    : 'U';
 
-  const initials = 'CS';
+  useEffect(() => {
+    boundActions.profile.fetchUserProfileRequest();
+  }, []);
 
   const handleLogout = () => {
-    boundActions.auth.logout();
-    navigate(ROUTES.auth.login);
+    boundActions.auth.logoutRequest();
   };
 
   return (
@@ -100,14 +102,14 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                   className={classes.dropdownItem}
                   onClick={() => { setProfileOpen(false); navigate(ROUTES.userProfile); }}
                 >
-                  👤 View Profile
+                  View Profile
                 </button>
                 <button
                   className={classes.dropdownItem}
                   onClick={handleLogout}
                   style={{ color: '#d32f2f' }}
                 >
-                  ⎋ Sign out
+                  Sign out
                 </button>
               </div>
             )}

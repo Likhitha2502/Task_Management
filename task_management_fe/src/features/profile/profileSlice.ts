@@ -11,7 +11,7 @@ import { getResponseError } from '@/utils/response';
 
 export interface ProfileState {
   userProfile: User | null;
-  imageIcon: User['profilePicture'] | null;
+  imageIcon: User['profilePictureUrl'] | null;
   error: string | null;
   loading: {
     fetch: boolean;
@@ -37,7 +37,7 @@ const profileSlice = createSlice({
   name: 'profile',
   initialState,
   reducers: {
-    fetchUserProfileRequest(state, _action: PayloadAction<{ email: string }>) {
+    fetchUserProfileRequest(state) {
       state.loading.fetch = true;
       state.error = null;
     },
@@ -51,7 +51,7 @@ const profileSlice = createSlice({
       state.error = action.payload;
     },
 
-    fetchUserProfilePictureRequest(state, _action: PayloadAction<{ email: string }>) {
+    fetchUserProfilePictureRequest(state) {
       state.loading.image = true;
       state.error = null;
     },
@@ -110,8 +110,8 @@ export const selectors = {
 const fetchUserProfileEpic: Epic = (action$) =>
   action$.pipe(
     ofType(profileSliceActions.fetchUserProfileRequest.type),
-    switchMap(({ payload }: { type: string; payload: { email: string } }) =>
-      from(http.get<User>(api.profile.userInfo(payload.email))).pipe(
+    switchMap(({}) =>
+      from(http.get<User>(api.profile.userInfo)).pipe(
         map((response) => profileSliceActions.fetchUserProfileSuccess(response.data)),
         catchError((error) => {
           const message = getResponseError(error) || 'Failed to fetch user profile.';
@@ -144,8 +144,8 @@ const fetchUserProfileEpic: Epic = (action$) =>
 const fetchUserProfilePictureEpic: Epic = (action$) =>
   action$.pipe(
     ofType(profileSliceActions.fetchUserProfilePictureRequest.type),
-    switchMap(({ payload }: { type: string; payload: { email: string } }) =>
-      from(http.get(api.profile.userIcon(payload.email), { responseType: 'blob' })).pipe(
+    switchMap(({}) =>
+      from(http.get(api.profile.userIcon, { responseType: 'blob' })).pipe(
         switchMap((response) =>
           new Promise<string>((resolve) => {
             const reader = new FileReader();
@@ -163,8 +163,6 @@ const updateUserProfileEpic: Epic = (action$) =>
   action$.pipe(
     ofType(profileSliceActions.updateUserProfileRequest.type),
     switchMap(({ payload }: { type: string; payload: { values: ProfilePayload; email: string } }) => {
-
-      // ── Build FormData instead of sending raw JSON ──────────────────────
       const formData = new FormData();
       formData.append('firstName', payload.values.firstName);
       formData.append('lastName', payload.values.lastName);

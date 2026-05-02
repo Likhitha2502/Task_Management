@@ -1,15 +1,15 @@
 export interface User {
-    id: number;
+    id?: number;
     firstName: string;
     lastName: string;
     email: string;
     token?: string;
     profilePicture?: File;
+    profilePictureUrl?: string;
 }
 
 export interface ProfilePayload {
     firstName: string;
     lastName: string;
-    profilePictureUrl?: string;
     profilePicture?: File;
 };

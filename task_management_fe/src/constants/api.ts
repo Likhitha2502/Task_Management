@@ -13,8 +13,8 @@ export const api = {
   },
   profile: {
     changePassword: `${BASE.profile}/change-password`,
-    userInfo: (email: string) => `${BASE.profile}/${email}`,
-    userIcon: (email: string) => `${BASE.profile}/picture/${email}`,
+    userInfo: `${BASE.profile}`,
+    userIcon: `${BASE.profile}/picture`,
     updateUserInfo: (email: string) => `${BASE.profile}?email=${email}`,
   },
   tasks: {

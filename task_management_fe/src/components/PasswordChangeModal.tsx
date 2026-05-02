@@ -70,7 +70,6 @@ export const ChangePasswordModal = ({ open, onClose, forced }: ChangePasswordMod
     }
 
     boundActions.auth.changePasswordRequest({
-      email: loggedInUser?.email as string,
       currentPassword: form.currentPassword,
       newPassword: form.newPassword,
     });

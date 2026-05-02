@@ -121,8 +121,8 @@ export const UserProfilePage = () => {
   useEffect(() => {
     const email = loggedInUser?.email;
     if (email) {
-      boundActions.profile.fetchUserProfilePictureRequest({ email });
-      boundActions.profile.fetchUserProfileRequest({ email });
+      boundActions.profile.fetchUserProfilePictureRequest();
+      boundActions.profile.fetchUserProfileRequest();
     }
   }, [loggedInUser?.email]);
 
@@ -192,7 +192,7 @@ export const UserProfilePage = () => {
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             initials={initials}
-            currentImage={pendingFile === null ? null : (pendingUrl || profileIcon)}
+            currentImage={pendingFile === null ? null : (pendingUrl  as string|| profileIcon as string)}
             onConfirm={handleModalConfirm}
           />
 
