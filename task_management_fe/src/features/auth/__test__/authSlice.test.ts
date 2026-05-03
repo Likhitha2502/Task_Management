@@ -1,4 +1,4 @@
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { of, Observable } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import reducer, {
@@ -7,7 +7,7 @@ import reducer, {
   AuthState,
   authEpics
 } from '../authSlice';
-import { RequestStatus, User, RegisterPayload, LoginPayload } from '../../../models/index';
+import { RequestStatus, RegisterPayload, LoginPayload, LoginResponse } from '../../../models/index';
 import http from '../../../services/http';
 
 jest.mock('../../../services/http', () => ({
@@ -20,16 +20,28 @@ jest.mock('../../../services/http', () => ({
   },
 }));
 
+jest.mock('../../../services/jwt', () => ({
+  jwtService: { setToken: jest.fn(), removeToken: jest.fn() },
+}));
+
+jest.mock('../../../utils/storage', () => ({
+  tempAuthService: { setTempPasswordFlag: jest.fn(), clearTempPasswordFlag: jest.fn() },
+}));
+
+jest.mock('../../../utils/response', () => ({
+  getResponseError: (error: any) => error?.response?.data?.message || null,
+}));
+
 const mockedHttp = http as jest.Mocked<typeof http>;
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-const mockUser: User = {
-  id: 1,
-  firstName: 'Alex',
-  lastName: 'Johnson',
+const mockLoginResponse: LoginResponse = {
+  message: 'Login successful',
   email: 'alex@example.com',
-  token: '',
+  requiresPasswordReset: false,
+  token: 'jwt-token-abc',
+  tokenType: 'Bearer',
 };
 
 const mockRegisterPayload: RegisterPayload = {
@@ -45,7 +57,6 @@ const mockLoginPayload: LoginPayload = {
 };
 
 const initialState: AuthState = {
-  currentUser: null,
   loggedInUser: null,
   isAuthorized: false,
   register: false,
@@ -53,6 +64,7 @@ const initialState: AuthState = {
   loading: {
     forgotPassword: false,
     changePassword: false,
+    logout: false,
   },
   accessToken: null,
   error: null,
@@ -64,7 +76,6 @@ const initialState: AuthState = {
   },
 };
 
-// helper — builds a minimal RootState shape for selectors
 const makeRootState = (auth: Partial<AuthState> = {}) => ({
   auth: { ...initialState, ...auth },
 });
@@ -72,8 +83,6 @@ const makeRootState = (auth: Partial<AuthState> = {}) => ({
 // ─── Reducer tests ────────────────────────────────────────────────────────────
 
 describe('authSlice — reducer', () => {
-
-  // ── Initial state ──────────────────────────────────────────────────────────
 
   it('returns the initial state when called with undefined', () => {
     expect(reducer(undefined, { type: '@@INIT' })).toEqual(initialState);
@@ -93,25 +102,26 @@ describe('authSlice — reducer', () => {
   });
 
   describe('registerSuccess', () => {
-    it('sets currentUser, clears register flag and error', () => {
+    it('sets register to false, status to Success, and clears error', () => {
       const state = reducer(
         { ...initialState, register: true },
-        authSliceActions.registerSuccess(mockUser)
+        authSliceActions.registerSuccess()
       );
       expect(state.register).toBe(false);
-      expect(state.currentUser).toEqual(mockUser);
+      expect(state.statuses.register).toBe(RequestStatus.Success);
       expect(state.error).toBeNull();
     });
   });
 
   describe('registerFailure', () => {
-    it('sets error message and clears register flag', () => {
+    it('sets error message, sets register status to Failure, and clears register flag', () => {
       const state = reducer(
         { ...initialState, register: true },
         authSliceActions.registerFailure('Email already in use')
       );
       expect(state.register).toBe(false);
       expect(state.error).toBe('Email already in use');
+      expect(state.statuses.register).toBe(RequestStatus.Failure);
     });
   });
 
@@ -130,12 +140,14 @@ describe('authSlice — reducer', () => {
   });
 
   describe('loginSuccess', () => {
-    it('sets currentUser, login status to Success, clears error', () => {
+    it('sets loggedInUser, isAuthorized, accessToken, login status to Success, clears error', () => {
       const state = reducer(
-        { ...initialState, statuses: { login: RequestStatus.Pending, logout: RequestStatus.Idle } },
-        authSliceActions.loginSuccess(mockUser)
+        { ...initialState, statuses: { ...initialState.statuses, login: RequestStatus.Pending } },
+        authSliceActions.loginSuccess(mockLoginResponse)
       );
-      expect(state.currentUser).toEqual(mockUser);
+      expect(state.loggedInUser).toEqual(mockLoginResponse);
+      expect(state.isAuthorized).toBe(true);
+      expect(state.accessToken).toBe(mockLoginResponse.token);
       expect(state.statuses.login).toBe(RequestStatus.Success);
       expect(state.error).toBeNull();
     });
@@ -144,7 +156,7 @@ describe('authSlice — reducer', () => {
   describe('loginFailure', () => {
     it('sets error and login status to Failure', () => {
       const state = reducer(
-        { ...initialState, statuses: { login: RequestStatus.Pending, logout: RequestStatus.Idle } },
+        { ...initialState, statuses: { ...initialState.statuses, login: RequestStatus.Pending } },
         authSliceActions.loginFailure('Invalid credentials')
       );
       expect(state.error).toBe('Invalid credentials');
@@ -154,14 +166,17 @@ describe('authSlice — reducer', () => {
 
   // ── Logout ─────────────────────────────────────────────────────────────────
 
-  describe('logout', () => {
-    it('clears currentUser and error, resets logout status to Idle', () => {
+  describe('logout (legacy)', () => {
+    it('clears loggedInUser, accessToken, isAuthorized and error, resets login/logout statuses', () => {
       const state = reducer(
-        { ...initialState, currentUser: mockUser, error: 'some error' },
+        { ...initialState, loggedInUser: mockLoginResponse, isAuthorized: true, accessToken: 'token', error: 'some error' },
         authSliceActions.logout()
       );
-      expect(state.currentUser).toBeNull();
+      expect(state.loggedInUser).toBeNull();
+      expect(state.isAuthorized).toBe(false);
+      expect(state.accessToken).toBeNull();
       expect(state.error).toBeNull();
+      expect(state.statuses.login).toBe(RequestStatus.Idle);
       expect(state.statuses.logout).toBe(RequestStatus.Idle);
     });
   });
@@ -213,14 +228,14 @@ describe('authSliceSelectors', () => {
     it('returns true when login status is Success', () => {
       expect(
         authSliceSelectors.isLoginSuccess(
-          makeRootState({ statuses: { login: RequestStatus.Success, logout: RequestStatus.Idle } }) as any
+          makeRootState({ statuses: { ...initialState.statuses, login: RequestStatus.Success } }) as any
         )
       ).toBe(true);
     });
     it('returns false when login status is Pending', () => {
       expect(
         authSliceSelectors.isLoginSuccess(
-          makeRootState({ statuses: { login: RequestStatus.Pending, logout: RequestStatus.Idle } }) as any
+          makeRootState({ statuses: { ...initialState.statuses, login: RequestStatus.Pending } }) as any
         )
       ).toBe(false);
     });
@@ -238,124 +253,39 @@ describe('authSliceSelectors', () => {
     });
   });
 
-  describe('getCurrentUser', () => {
-    it('returns the current user when set', () => {
-      expect(authSliceSelectors.getCurrentUser(makeRootState({ currentUser: mockUser }) as any)).toEqual(mockUser);
+  describe('loggedInUser', () => {
+    it('returns the logged-in user when set', () => {
+      expect(
+        authSliceSelectors.loggedInUser(makeRootState({ loggedInUser: mockLoginResponse }) as any)
+      ).toEqual(mockLoginResponse);
     });
     it('returns null when no user is logged in', () => {
-      expect(authSliceSelectors.getCurrentUser(makeRootState() as any)).toBeNull();
+      expect(authSliceSelectors.loggedInUser(makeRootState() as any)).toBeNull();
     });
   });
 });
 
 // ─── Epic tests ───────────────────────────────────────────────────────────────
 
-// Helper — runs an epic and collects all emitted actions into an array
 const runEpic = (epic: any, action: any, state = initialState) => {
-  const action$ = of(action); // Standard RxJS observable
-  const state$ = of({ auth: state }) as Observable<any>; // Standard RxJS observable
-  
+  const action$ = of(action);
+  const state$  = of({ auth: state }) as Observable<any>;
   return epic(action$, state$, {}).pipe(toArray()).toPromise() as Promise<any[]>;
 };
 
-// describe('registerEpic', () => {
-//   const [registerEpic] = authEpics as any; // grab individual epics for isolated testing
-
-//   it('dispatches registerSuccess with user data on a successful API call', async () => {
-//     mockedHttp.post.mockResolvedValueOnce({ data: mockUser });
-
-//     const actions = await runEpic(
-//       registerEpic,
-//       authSliceActions.registerRequest(mockRegisterPayload)
-//     );
-
-//     expect(mockedHttp.post).toHaveBeenCalledWith('/auth/register', mockRegisterPayload);
-//     expect(actions).toEqual([authSliceActions.registerSuccess(mockUser)]);
-//   });
-
-//   it('dispatches registerFailure with BE message on API error', async () => {
-//     mockedHttp.post.mockRejectedValueOnce({
-//       response: { data: { message: 'Email already exists' } },
-//     });
-
-//     const actions = await runEpic(
-//       registerEpic,
-//       authSliceActions.registerRequest(mockRegisterPayload)
-//     );
-
-//     expect(actions).toEqual([authSliceActions.registerFailure('Email already exists')]);
-//   });
-
-//   it('dispatches registerFailure with fallback message on network error', async () => {
-//     mockedHttp.post.mockRejectedValueOnce(new Error('Network Error'));
-
-//     const actions = await runEpic(
-//       registerEpic,
-//       authSliceActions.registerRequest(mockRegisterPayload)
-//     );
-
-//     expect(actions).toEqual([
-//       authSliceActions.registerFailure('Registration failed. Please try again.'),
-//     ]);
-//   });
-// });
-
-// describe('loginEpic', () => {
-//   const [, loginEpic] = authEpics as any;
-
-//   it('dispatches loginSuccess with user data on a successful API call', async () => {
-//     mockedHttp.post.mockResolvedValueOnce({ data: mockUser });
-
-//     const actions = await runEpic(
-//       loginEpic,
-//       authSliceActions.loginRequest(mockLoginPayload)
-//     );
-
-//     expect(mockedHttp.post).toHaveBeenCalledWith('/auth/login', mockLoginPayload);
-//     expect(actions).toEqual([authSliceActions.loginSuccess(mockUser)]);
-//   });
-
-//   it('dispatches loginFailure with BE message on API error', async () => {
-//     mockedHttp.post.mockRejectedValueOnce({
-//       response: { data: { message: 'Invalid credentials' } },
-//     });
-
-//     const actions = await runEpic(
-//       loginEpic,
-//       authSliceActions.loginRequest(mockLoginPayload)
-//     );
-
-//     expect(actions).toEqual([authSliceActions.loginFailure('Invalid credentials')]);
-//   });
-
-//   it('dispatches loginFailure with fallback message on network error', async () => {
-//     mockedHttp.post.mockRejectedValueOnce(new Error('Network Error'));
-
-//     const actions = await runEpic(
-//       loginEpic,
-//       authSliceActions.loginRequest(mockLoginPayload)
-//     );
-
-//     expect(actions).toEqual([
-//       authSliceActions.loginFailure('Login failed. Please check your credentials.'),
-//     ]);
-//   });
-// });
-
 describe('registerEpic', () => {
-  // Using array destructuring safely
-  const registerEpic = authEpics; 
+  beforeEach(() => { jest.clearAllMocks(); });
 
-  it('dispatches registerSuccess with user data on a successful API call', async () => {
-    mockedHttp.post.mockResolvedValueOnce({ data: mockUser });
+  it('dispatches registerSuccess on a successful API call', async () => {
+    mockedHttp.post.mockResolvedValueOnce({ data: {} });
 
     const actions = await runEpic(
-      registerEpic,
+      authEpics,
       authSliceActions.registerRequest(mockRegisterPayload)
     );
 
     expect(mockedHttp.post).toHaveBeenCalledWith('/auth/register', mockRegisterPayload);
-    expect(actions).toEqual([authSliceActions.registerSuccess(mockUser)]);
+    expect(actions).toEqual([authSliceActions.registerSuccess()]);
   });
 
   it('dispatches registerFailure with BE message on API error', async () => {
@@ -364,27 +294,68 @@ describe('registerEpic', () => {
     });
 
     const actions = await runEpic(
-      registerEpic,
+      authEpics,
       authSliceActions.registerRequest(mockRegisterPayload)
     );
 
     expect(actions).toEqual([authSliceActions.registerFailure('Email already exists')]);
   });
+
+  it('dispatches registerFailure with fallback message on network error', async () => {
+    mockedHttp.post.mockRejectedValueOnce(new Error('Network Error'));
+
+    const actions = await runEpic(
+      authEpics,
+      authSliceActions.registerRequest(mockRegisterPayload)
+    );
+
+    expect(actions).toEqual([
+      authSliceActions.registerFailure('Registration failed. Please try again.'),
+    ]);
+  });
 });
 
 describe('loginEpic', () => {
-  const loginEpic = authEpics;
+  beforeEach(() => { jest.clearAllMocks(); });
 
-  it('dispatches loginSuccess with user data on a successful API call', async () => {
-    mockedHttp.post.mockResolvedValueOnce({ data: mockUser });
+  it('dispatches loginSuccess and setChangePasswordFlag on a successful API call', async () => {
+    mockedHttp.post.mockResolvedValueOnce({ data: mockLoginResponse });
 
     const actions = await runEpic(
-      loginEpic,
+      authEpics,
       authSliceActions.loginRequest(mockLoginPayload)
     );
 
     expect(mockedHttp.post).toHaveBeenCalledWith('/auth/login', mockLoginPayload);
-    expect(actions).toEqual([authSliceActions.loginSuccess(mockUser)]);
+    expect(actions).toEqual([
+      authSliceActions.loginSuccess(mockLoginResponse),
+      authSliceActions.setChangePasswordFlag(mockLoginResponse.requiresPasswordReset),
+    ]);
+  });
+
+  it('dispatches loginFailure with BE message on API error', async () => {
+    mockedHttp.post.mockRejectedValueOnce({
+      response: { data: { message: 'Invalid credentials' } },
+    });
+
+    const actions = await runEpic(
+      authEpics,
+      authSliceActions.loginRequest(mockLoginPayload)
+    );
+
+    expect(actions).toEqual([authSliceActions.loginFailure('Invalid credentials')]);
+  });
+
+  it('dispatches loginFailure with fallback message on network error', async () => {
+    mockedHttp.post.mockRejectedValueOnce(new Error('Network Error'));
+
+    const actions = await runEpic(
+      authEpics,
+      authSliceActions.loginRequest(mockLoginPayload)
+    );
+
+    expect(actions).toEqual([
+      authSliceActions.loginFailure('Login failed. Please check your credentials.'),
+    ]);
   });
 });
-

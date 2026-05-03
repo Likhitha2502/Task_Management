@@ -4,11 +4,11 @@ import { from, of } from 'rxjs';
 import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { RootState } from '../../app/store';
-import { api } from '@/constants/api';
+import { api } from '../../constants/api';
 import { User, ProfilePayload } from '../../models';
 import http from '../../services/http';
-import { getResponseError } from '@/utils/response';
-import { profileFile } from '@/utils/profileFile';
+import { getResponseError } from '../../utils/response';
+import { profileFile } from '../../utils/profileFile';
 
 export interface ProfileState {
   userProfile: User | null;

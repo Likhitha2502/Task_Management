@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { jwtService } from './jwt';
-import { authSliceActions } from '@/features/auth/authSlice';
-import { store } from '@/app/store';
+import { authSliceActions } from '../features/auth/authSlice';
+import { store } from '../app/store';
 
 const http = axios.create({
   baseURL: 'http://localhost:8080',

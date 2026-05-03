@@ -239,8 +239,8 @@ const updateTaskEpic: Epic = (action$) =>
 const deleteTaskEpic: Epic = (action$) =>
   action$.pipe(
     ofType(taskSliceActions.deleteTaskRequest.type),
-    switchMap(({ payload: id }: { type: string; payload: number }) =>
-      from(http.delete(api.tasks.delete(id))).pipe(
+    switchMap(({ payload }: { type: string; payload: { id: number } }) =>
+      from(http.delete(api.tasks.delete(payload.id))).pipe(
         map(() => taskSliceActions.deleteTaskSuccess()),
         catchError((err) => of(taskSliceActions.deleteTaskFailure(
           err?.response?.data?.message || 'Failed to delete task.'
