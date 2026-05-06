@@ -1,6 +1,6 @@
 import { createDraftSafeSelector, createSlice } from '@reduxjs/toolkit';
 import { from, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
 import { combineEpics, ofType } from 'redux-observable';
 
 import { api } from '../../constants/api';
@@ -219,7 +219,10 @@ const createTaskEpic: Epic = (action$) =>
     ofType(taskSliceActions.createTaskRequest.type),
     switchMap(({ payload }: { type: string; payload: CreateTaskPayload }) =>
       from(http.post<Task>(api.tasks.create, payload)).pipe(
-        map((res) => taskSliceActions.createTaskSuccess(res.data)),
+        mergeMap((res) => of(
+          taskSliceActions.createTaskSuccess(res.data),
+          taskSliceActions.fetchTasksRequest(),
+        )),
         catchError((error) => of(taskSliceActions.createTaskFailure(
           error?.response?.data?.message || 'Failed to create task.'
         )))
@@ -232,20 +235,26 @@ const updateTaskEpic: Epic = (action$) =>
     ofType(taskSliceActions.updateTaskRequest.type),
     switchMap(({ payload }: { type: string; payload: UpdateTaskPayload }) =>
       from(http.put<Task>(api.tasks.update(payload.id), payload.data)).pipe(
-        map(() => taskSliceActions.updateTaskSuccess()),
+        mergeMap(() => of(
+          taskSliceActions.updateTaskSuccess(),
+          taskSliceActions.fetchTasksRequest(),
+        )),
         catchError((err) => of(taskSliceActions.updateTaskFailure(
           err?.response?.data?.message || 'Failed to update task.'
         )))
       )
     )
   );
- 
+
 const deleteTaskEpic: Epic = (action$) =>
   action$.pipe(
     ofType(taskSliceActions.deleteTaskRequest.type),
     switchMap(({ payload }: { type: string; payload: { id: number } }) =>
       from(http.delete(api.tasks.delete(payload.id))).pipe(
-        map(() => taskSliceActions.deleteTaskSuccess()),
+        mergeMap(() => of(
+          taskSliceActions.deleteTaskSuccess(),
+          taskSliceActions.fetchTasksRequest(),
+        )),
         catchError((err) => of(taskSliceActions.deleteTaskFailure(
           err?.response?.data?.message || 'Failed to delete task.'
         )))

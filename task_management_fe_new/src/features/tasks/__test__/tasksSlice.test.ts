@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import {of } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
@@ -539,13 +542,16 @@ describe('fetchTasksEpic', () => {
 describe('createTaskEpic', () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
-  it('dispatches createTaskSuccess with created task on success', async () => {
+  it('dispatches createTaskSuccess then fetchTasksRequest on success', async () => {
     mockedHttp.post.mockResolvedValueOnce({ data: mockTask });
 
     const actions = await runEpic(taskEpics, taskSliceActions.createTaskRequest(mockCreatePayload));
 
     expect(mockedHttp.post).toHaveBeenCalledWith('/tasks', mockCreatePayload);
-    expect(actions).toEqual([taskSliceActions.createTaskSuccess(mockTask)]);
+    expect(actions).toEqual([
+      taskSliceActions.createTaskSuccess(mockTask),
+      taskSliceActions.fetchTasksRequest(),
+    ]);
   });
 
   it('dispatches createTaskFailure with BE message on API error', async () => {
@@ -570,13 +576,16 @@ describe('createTaskEpic', () => {
 describe('updateTaskEpic', () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
-  it('dispatches updateTaskSuccess on success', async () => {
+  it('dispatches updateTaskSuccess then fetchTasksRequest on success', async () => {
     mockedHttp.put.mockResolvedValueOnce({ data: mockTask });
 
     const actions = await runEpic(taskEpics, taskSliceActions.updateTaskRequest(mockUpdatePayload));
 
     expect(mockedHttp.put).toHaveBeenCalledWith(`/tasks/${mockUpdatePayload.id}`, mockUpdatePayload.data);
-    expect(actions).toEqual([taskSliceActions.updateTaskSuccess()]);
+    expect(actions).toEqual([
+      taskSliceActions.updateTaskSuccess(),
+      taskSliceActions.fetchTasksRequest(),
+    ]);
   });
 
   it('dispatches updateTaskFailure with BE message on API error', async () => {
@@ -601,13 +610,16 @@ describe('updateTaskEpic', () => {
 describe('deleteTaskEpic', () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
-  it('dispatches deleteTaskSuccess on success', async () => {
+  it('dispatches deleteTaskSuccess then fetchTasksRequest on success', async () => {
     mockedHttp.delete.mockResolvedValueOnce({});
 
     const actions = await runEpic(taskEpics, taskSliceActions.deleteTaskRequest({ id: 1 }));
 
     expect(mockedHttp.delete).toHaveBeenCalledWith('/tasks/1');
-    expect(actions).toEqual([taskSliceActions.deleteTaskSuccess()]);
+    expect(actions).toEqual([
+      taskSliceActions.deleteTaskSuccess(),
+      taskSliceActions.fetchTasksRequest(),
+    ]);
   });
 
   it('dispatches deleteTaskFailure with BE message on API error', async () => {

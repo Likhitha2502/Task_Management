@@ -99,7 +99,7 @@ export const TasksList = () => {
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <Box className={classes.pageHeader}>
         <Typography component="h1" className={classes.pageTitle}>
-          All my tasks <span className={classes.taskCount}>{taskCount}</span>
+          My tasks <span className={classes.taskCount}>{taskCount}</span>
         </Typography>
         <Box className={classes.headerActions}>
           <Tooltip title="Filter">

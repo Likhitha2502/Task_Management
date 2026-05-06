@@ -16,7 +16,7 @@ export const DeleteTaskDialog = ({ task, deleting, onConfirm, onCancel }: Delete
     </DialogTitle>
     <DialogContent>
       <Typography style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#555' }}>
-        "<strong>{task?.name}</strong>" will be permanently deleted. This cannot be undone.
+        Are you sure you want to delete the task <strong>{task?.title}</strong>?
       </Typography>
     </DialogContent>
     <DialogActions style={{ padding: '8px 24px 20px', gap: '8px' }}>

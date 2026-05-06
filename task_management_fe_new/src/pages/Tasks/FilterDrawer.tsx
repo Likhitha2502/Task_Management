@@ -1,35 +1,69 @@
 // src/components/FilterDrawer/FilterDrawer.tsx
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { Close } from '@mui/icons-material';
 import {
 Box, Button, Checkbox, Chip,
-Divider,   Drawer, FormControlLabel,   FormGroup, TextField,
+Divider,   Drawer, FormControlLabel,   FormGroup, IconButton, TextField,
 Typography, } from '@mui/material';
 
 import { boundActions, selectors } from '../../app/index';
 import { CORAL,PRIORITY_COLORS, STATUS_COLORS } from '../../models/color';
-import { PRIORITIES, STATUSES, type TasksPriority,type TaskStatus } from '../../models/task';
+import { PRIORITIES, STATUSES, type TaskFilters, type TasksPriority,type TaskStatus } from '../../models/task';
 
 type Props = { open: boolean; onClose: () => void };
 
+const EMPTY_FILTERS: TaskFilters = { status: [], priority: [], dueDateFrom: null, dueDateTo: null };
+
+const arraysEqual = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((v) => b.includes(v));
+
 export const FilterDrawer = ({ open, onClose }: Props) => {
-  const filters        = useSelector(selectors.tasks.filters);
+  const appliedFilters   = useSelector(selectors.tasks.filters);
   const hasActiveFilters = useSelector(selectors.tasks.hasActiveFilters);
 
+  const [draft, setDraft] = useState<TaskFilters>(EMPTY_FILTERS);
+
+  // Sync draft from Redux whenever the drawer opens
+  useEffect(() => {
+    if (open) setDraft(appliedFilters);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const draftIsDirty =
+    !arraysEqual(draft.status, appliedFilters.status) ||
+    !arraysEqual(draft.priority, appliedFilters.priority) ||
+    draft.dueDateFrom !== appliedFilters.dueDateFrom ||
+    draft.dueDateTo   !== appliedFilters.dueDateTo;
+
   const toggleStatus = useCallback((status: TaskStatus) => {
-    const next = filters.status.includes(status)
-      ? filters.status.filter((s) => s !== status)
-      : [...filters.status, status];
-    boundActions.tasks.setFilters({ status: next });
-  }, [filters.status]);
+    setDraft((prev) => ({
+      ...prev,
+      status: prev.status.includes(status)
+        ? prev.status.filter((s) => s !== status)
+        : [...prev.status, status],
+    }));
+  }, []);
 
   const togglePriority = useCallback((priority: TasksPriority) => {
-    const next = filters.priority.includes(priority)
-      ? filters.priority.filter((p) => p !== priority)
-      : [...filters.priority, priority];
-    boundActions.tasks.setFilters({ priority: next });
-  }, [filters.priority]);
+    setDraft((prev) => ({
+      ...prev,
+      priority: prev.priority.includes(priority)
+        ? prev.priority.filter((p) => p !== priority)
+        : [...prev.priority, priority],
+    }));
+  }, []);
+
+  const handleApply = useCallback(() => {
+    boundActions.tasks.setFilters(draft);
+    onClose();
+  }, [draft, onClose]);
+
+  // Clears both the Redux-applied filters and the local draft
+  const handleReset = useCallback(() => {
+    boundActions.tasks.clearFilters();
+    setDraft(EMPTY_FILTERS);
+  }, []);
 
   const sectionLabel: React.CSSProperties = {
     fontFamily: 'Georgia, serif', fontWeight: 700,
@@ -46,12 +80,17 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
         <Typography style={{ fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '17px', color: '#1a1a1a' }}>
           Filter Tasks
         </Typography>
-        {hasActiveFilters && (
-          <Button size="small" onClick={() => boundActions.tasks.clearFilters()}
-            style={{ color: CORAL, fontFamily: 'Georgia, serif', textTransform: 'none', fontSize: '12px' }}>
-            Clear all
-          </Button>
-        )}
+        <Box style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {hasActiveFilters && (
+            <Button size="small" onClick={handleReset}
+              style={{ color: CORAL, fontFamily: 'Georgia, serif', textTransform: 'none', fontSize: '12px' }}>
+              Reset Filters
+            </Button>
+          )}
+          <IconButton size="small" onClick={onClose} style={{ color: '#999' }}>
+            <Close fontSize="small" />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Status */}
@@ -61,7 +100,7 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
           <FormControlLabel key={status}
             control={
               <Checkbox
-                checked={filters.status.includes(status)}
+                checked={draft.status.includes(status)}
                 onChange={() => toggleStatus(status)}
                 size="small"
                 sx={{ color: '#ddd', '&.Mui-checked': { color: CORAL } }}
@@ -90,7 +129,7 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
           <FormControlLabel key={priority}
             control={
               <Checkbox
-                checked={filters.priority.includes(priority)}
+                checked={draft.priority.includes(priority)}
                 onChange={() => togglePriority(priority)}
                 size="small"
                 sx={{ color: '#ddd', '&.Mui-checked': { color: CORAL } }}
@@ -120,8 +159,8 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
             From
           </Typography>
           <TextField fullWidth size="small" type="date"
-            value={filters.dueDateFrom ?? ''}
-            onChange={(e) => boundActions.tasks.setFilters({ dueDateFrom: e.target.value || null })}
+            value={draft.dueDateFrom ?? ''}
+            onChange={(e) => setDraft((prev) => ({ ...prev, dueDateFrom: e.target.value || null }))}
             sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '13px' } }}
           />
         </Box>
@@ -130,17 +169,21 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
             To
           </Typography>
           <TextField fullWidth size="small" type="date"
-            value={filters.dueDateTo ?? ''}
-            onChange={(e) => boundActions.tasks.setFilters({ dueDateTo: e.target.value || null })}
+            value={draft.dueDateTo ?? ''}
+            onChange={(e) => setDraft((prev) => ({ ...prev, dueDateTo: e.target.value || null }))}
             sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '13px' } }}
           />
         </Box>
       </Box>
 
       {/* Apply */}
-      <Button fullWidth variant="contained" onClick={onClose}
-        style={{ backgroundColor: CORAL, color: '#fff', borderRadius: '8px',
-          textTransform: 'none', fontFamily: 'Georgia, serif', fontWeight: 600, fontSize: '14px' }}
+      <Button fullWidth variant="contained" onClick={handleApply} disabled={!draftIsDirty}
+        style={{
+          backgroundColor: draftIsDirty ? CORAL : '#e0e0e0',
+          color: draftIsDirty ? '#fff' : '#aaa',
+          borderRadius: '8px', textTransform: 'none',
+          fontFamily: 'Georgia, serif', fontWeight: 600, fontSize: '14px',
+        }}
       >
         Apply Filters
       </Button>

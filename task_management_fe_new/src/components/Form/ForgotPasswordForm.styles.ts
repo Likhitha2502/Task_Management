@@ -4,6 +4,11 @@ export const useForgotPasswordFormStyles = makeStyles({ name: 'ForgotPasswordFor
   form: {
     width: '100%',
   },
+  errorText: {
+    color: '#d32f2f',
+    marginBottom: '12px',
+    fontSize: '0.85rem',
+  },
   emailSection: {
     marginBottom: '24px',
   },

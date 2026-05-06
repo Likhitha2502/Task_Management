@@ -11,6 +11,7 @@ import { selectors } from '@/app/selectors';
 
 import { boundActions } from '../../app/boundActions';
 import { useSignUpFormStyles } from '../../components/Form/SignUpForm.styles';
+import { PasswordInput } from '../Field/PasswordInput';
 
 type SignUpFormProps = {
   onBackToLogin: () => void;
@@ -76,9 +77,13 @@ export const SignUpForm = ({ onBackToLogin }: SignUpFormProps) => {
 
       <Box className={classes.passwordField}>
         <Typography variant="body2" className={classes.label}>Password</Typography>
-        <TextField fullWidth className={classes.textField} name="password" type="password"
-          placeholder="Enter Account Password" size="small"
-          value={form.password} onChange={handleChange} />
+        <PasswordInput
+          name="password"
+          className={classes.textField}
+          placeholder="Enter Account Password"
+          value={form.password}
+          onChange={handleChange}
+        />
       </Box>
 
       <Button fullWidth variant="contained" className={classes.primaryButton}

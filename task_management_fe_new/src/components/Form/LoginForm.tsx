@@ -1,4 +1,3 @@
-// src/components/LoginForm.tsx
 import { useSelector } from 'react-redux';
 
 import { Box, Button, Typography } from '@mui/material';
@@ -38,10 +37,10 @@ export const LoginForm = ({ onSignUpClick, onForgotClick }: LoginFormProps) => {
         setSubmitting(false);
       }}>
       {({ isValid, isSubmitting }) => (
-        <Form className={classes.form}>
+        <Form className={classes.form} onChange={() => { if (error) boundActions.auth.clearError(); }}>
           {error && (
             <Typography variant="body2" className={classes.errorText}>
-              {error}
+              {error as string}
             </Typography>
           )}
 

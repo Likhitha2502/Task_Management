@@ -8,7 +8,7 @@ DialogContent, DialogTitle, FormControl, MenuItem,
   Select, styled,
   TextField, Typography, } from '@mui/material';
 
-import { selectors } from '@/app/selectors';
+import { boundActions, selectors } from '@/app/index';
 import { CORAL } from '@/models/color';
 
 import { PRIORITIES,STATUSES, type Task, type TasksPriority, type TaskStatus } from '../../models/task'
@@ -91,12 +91,14 @@ export const EditTaskDialog = ({ task, saving, onSave, onClose }: EditTaskDialog
         priority: task.priority,
         dueDate:  task.dueDate,
       });
+      boundActions.tasks.clearTasksErrors();
     }
   }, [task]);
 
   const handleChange = useCallback(
     <K extends keyof EditableDraft>(field: K, value: EditableDraft[K]) => {
       setDraft((prev) => ({ ...prev, [field]: value }));
+      boundActions.tasks.clearTasksErrors();
     }, []
   );
 

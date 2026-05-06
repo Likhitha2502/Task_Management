@@ -58,13 +58,13 @@ const LoginPage = () => {
 
         {view === 'login' && (
           <LoginForm
-            onSignUpClick={() => setView('signup')}
-            onForgotClick={() => setView('forgot')}
+            onSignUpClick={() => { boundActions.auth.clearError(); setView('signup'); }}
+            onForgotClick={() => { boundActions.auth.clearError(); setView('forgot'); }}
           />
         )}
 
-        {view === 'signup' && <SignUpForm onBackToLogin={() => setView('login')} />}
-        {view === 'forgot' && <ForgotPasswordForm onBackToLogin={() => setView('login')} />}
+        {view === 'signup' && <SignUpForm onBackToLogin={() => { boundActions.auth.clearError(); setView('login'); }} />}
+        {view === 'forgot' && <ForgotPasswordForm onBackToLogin={() => { boundActions.auth.clearError(); setView('login'); }} />}
 
         <Typography variant="caption" className={classes.footerCaption}>
           Only you can see your tasks. No shared access.

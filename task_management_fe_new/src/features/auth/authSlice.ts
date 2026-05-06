@@ -225,7 +225,7 @@ const registerEpic: Epic = (action$) =>
         map(() => authSliceActions.registerSuccess()),
         catchError((error) => {
           const message = getResponseError(error) || 'Registration failed. Please try again.';
-          return of(authSliceActions.registerFailure(String(message)));
+          return of(authSliceActions.registerFailure(message));
         })
       )
     )
@@ -246,7 +246,7 @@ const loginEpic: Epic = (action$) =>
         }),
         catchError((error) => {
           const message = getResponseError(error) || 'Login failed. Please check your credentials.';
-          return of(authSliceActions.loginFailure(String(message)));
+          return of(authSliceActions.loginFailure(message));
         })
       )
     )
@@ -262,8 +262,8 @@ const forgotPasswordEpic: Epic = (action$) =>
           return authSliceActions.forgotPasswordSuccess();
         }),
         catchError((error) => {
-          const message = getResponseError(error) || 'Password Reset failed. Please try again.';
-          return of(authSliceActions.forgotPasswordFailure(String(message)));
+          const message = getResponseError(error) || 'Password reset failed. Please try again.';
+          return of(authSliceActions.forgotPasswordFailure(message));
         })
       )
     )
@@ -290,7 +290,7 @@ const changePasswordEpic: Epic = (action$) =>
         }),
         catchError((error) => {
           const message = getResponseError(error) || 'Failed to change password.';
-          return of(authSliceActions.changePasswordFailure(String(message)));
+          return of(authSliceActions.changePasswordFailure(message));
         })
       )
     )
@@ -312,7 +312,7 @@ const logoutEpic: Epic = (action$) =>
           jwtService.removeToken();
           tempAuthService.clearTempPasswordFlag();
           const message = getResponseError(error) || 'Logout failed.';
-          return of(authSliceActions.logoutFailure(String(message)));
+          return of(authSliceActions.logoutFailure(message));
         })
       )
     )
