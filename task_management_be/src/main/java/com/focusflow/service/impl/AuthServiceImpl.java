@@ -60,6 +60,8 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+        log.info("Registering user with email: {}", request.getEmail());
+
         userRepository.save(user);
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -77,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Invalid credentials");
         }
         String token = jwtUtil.generateToken(user.getEmail());
+        log.info("User logged in successfully: {}", user.getEmail());
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Login successful");
@@ -96,6 +99,8 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(tempPassword));
         user.setPasswordResetRequired(true);
         userRepository.save(user);
+
+        log.info("Temporary password generated for user: {}", user.getEmail());
 
         emailService.sendTemporaryPassword(user.getEmail(), tempPassword);
 
@@ -128,6 +133,8 @@ public class AuthServiceImpl implements AuthService {
     public Map<String, Object> updateProfile(String email, String firstName, String lastName, MultipartFile profilePicture) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
+
+        log.info("Updating profile for user: {}", email);
 
         if (firstName != null && !firstName.isBlank()) {
             user.setFirstName(firstName);
@@ -170,6 +177,7 @@ public class AuthServiceImpl implements AuthService {
             try {
                 profilePicture.transferTo(destination);
             } catch (IOException e) {
+                log.error("Failed to upload profile picture for user: {}", email, e);
                 throw new BadRequestException("Failed to upload profile picture: " + e.getMessage());
             }
 
@@ -245,6 +253,9 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setPasswordResetRequired(false);
+
+        log.info("Password changed for user: {}", email);
+
         userRepository.save(user);
 
         Map<String, Object> response = new LinkedHashMap<>();

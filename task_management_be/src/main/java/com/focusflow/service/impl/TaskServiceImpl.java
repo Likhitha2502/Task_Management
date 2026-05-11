@@ -1,6 +1,7 @@
     package com.focusflow.service.impl;
 
     import com.focusflow.entity.Task;
+    import com.focusflow.exception.BadRequestException;
     import com.focusflow.repository.TaskRepository;
     import com.focusflow.service.TaskService;
     import org.springframework.stereotype.Service;
@@ -29,13 +30,13 @@
         @Override
         public Task getTask(Long id, String email) {
             return taskRepository.findByIdAndUserEmail(id, email)
-                    .orElseThrow(() -> new RuntimeException("Task not found"));
+                    .orElseThrow(() -> new BadRequestException("Task not found"));
         }
 
         @Override
         public Task updateTask(Long id, Task updated, String email) {
             Task existing = taskRepository.findByIdAndUserEmail(id, email)
-                    .orElseThrow(() -> new RuntimeException("Task not found"));
+                    .orElseThrow(() -> new BadRequestException("Task not found"));
 
             existing.setTitle(updated.getTitle());
             existing.setDescription(updated.getDescription());
@@ -49,7 +50,7 @@
         @Override
         public void deleteTask(Long id, String email) {
             Task existing = taskRepository.findByIdAndUserEmail(id, email)
-                    .orElseThrow(() -> new RuntimeException("Task not found"));
+                    .orElseThrow(() -> new BadRequestException("Task not found"));
 
             taskRepository.delete(existing);
         }

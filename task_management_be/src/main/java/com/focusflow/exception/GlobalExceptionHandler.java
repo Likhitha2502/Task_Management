@@ -1,11 +1,13 @@
 package com.focusflow.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -13,7 +15,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleBadRequest(BadRequestException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", ex.getMessage());
+        log.error("Unhandled exception occurred", ex);
+        response.put("message", "Unexpected internal server error");
         return response;
     }
 
@@ -21,7 +24,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Map<String, Object> handleUnauthorized(UnauthorizedException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", ex.getMessage());
+        log.error("Unhandled exception occurred", ex);
+        response.put("message", "Unexpected internal server error");
         return response;
     }
 
@@ -38,7 +42,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleGeneralException(Exception ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", ex.getMessage());
+        log.error("Unhandled exception occurred", ex);
+        response.put("message", "Unexpected internal server error");
         return response;
     }
 
