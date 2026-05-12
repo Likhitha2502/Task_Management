@@ -6,11 +6,13 @@ import {
 import {
   selectors as profileSelectors,
 } from '../features/profile/profileSlice';
+import { progressSelectors } from '../features/progress/progressSlice';
 import { toastSelectors } from '../features/toast/toastSlice';
 
 export const selectors = {
   auth: authSelectors,
   profile: profileSelectors,
+  progress: progressSelectors,
   tasks: taskSelectors,
   toast: toastSelectors,
 };

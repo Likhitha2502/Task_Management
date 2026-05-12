@@ -23,4 +23,8 @@ export const api = {
     update: (id: number) => `/tasks/${id}`,
     delete: (id: number) => `/tasks/${id}`,
   },
+  progress: {
+    count:   '/progress/count',
+    percent: '/progress/percent',
+  },
 };

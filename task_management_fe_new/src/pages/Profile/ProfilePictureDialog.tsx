@@ -1,7 +1,17 @@
-import React, { useEffect,useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { CloudUpload,Delete } from '@mui/icons-material';
-import { Avatar,Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { CloudUpload, Delete } from '@mui/icons-material';
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+
+export const useProfilePicModalStyles = makeStyles({ name: 'ProfilePictureModal' })(() => ({
+  subtitleText: {
+    fontFamily: 'Georgia, serif',
+    color: '#999',
+    fontSize: '13px',
+    marginTop: '4px',
+  },
+}));
 
 interface Props {
   open: boolean;
@@ -16,6 +26,7 @@ export const ProfilePictureDialog = ({ open, onClose, currentImage, initials, on
   const [tempPreview, setTempPreview] = useState<string | null>(null);
   const [isDeletedInModal, setIsDeletedInModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { classes } = useProfilePicModalStyles();
 
   // Reset internal modal state every time it opens
   useEffect(() => {
@@ -50,9 +61,13 @@ export const ProfilePictureDialog = ({ open, onClose, currentImage, initials, on
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ fontFamily: 'Georgia, serif' }}>Update Photo</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
-        <Avatar 
+
+        <Typography variant="body2" className={classes.subtitleText}>
+          After Set please click save to update profile picture.
+        </Typography>
+        <Avatar
           // Visual priority: Local Delete > Local Upload > Existing Image > Initials
-          src={isDeletedInModal ? undefined : (tempPreview || currentImage || undefined)} 
+          src={isDeletedInModal ? undefined : (tempPreview || currentImage || undefined)}
           sx={{ width: 120, height: 120, mb: 2 }}
         >
           {initials}
@@ -64,9 +79,9 @@ export const ProfilePictureDialog = ({ open, onClose, currentImage, initials, on
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} color="inherit">Cancel</Button>
-        <Button 
-          startIcon={<Delete />} 
-          color="error" 
+        <Button
+          startIcon={<Delete />}
+          color="error"
           onClick={() => {
             setTempFile(null);
             setIsDeletedInModal(true); // Only changes the modal's preview

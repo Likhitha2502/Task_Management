@@ -79,6 +79,10 @@ const TOAST_MAP: Record<string, ToastConfig> = {
   // Profile
   'profile/updateUserProfileSuccess': { message: 'Profile updated successfully', severity: 'success' },
   'profile/updateUserProfileFailure': { message: null,                           severity: 'error'   },
+
+  // Progress
+  'progress/fetchCountFailure':   { message: null, severity: 'error' },
+  'progress/fetchPercentFailure': { message: null, severity: 'error' },
 };
 
 // ─── Epic ─────────────────────────────────────────────────────────────────────

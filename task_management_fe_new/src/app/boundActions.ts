@@ -7,6 +7,9 @@ import {
     profileSliceActions
 } from '../features/profile/profileSlice';
 import {
+    progressSliceActions
+} from '../features/progress/progressSlice';
+import {
     taskSliceActions
 } from '../features/tasks/tasksSlice';
 import {
@@ -21,6 +24,10 @@ export const boundActions = {
     ),
     profile: bindActionCreators(
         profileSliceActions,
+        store.dispatch
+    ),
+    progress: bindActionCreators(
+        progressSliceActions,
         store.dispatch
     ),
     tasks: bindActionCreators(

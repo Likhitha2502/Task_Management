@@ -10,6 +10,29 @@ export const STATUS_COLORS: Record<TaskStatus, { bg: string; color: string }> = 
   'TODO':       { bg: '#f5f5f5', color: '#757575' },
 };
 
+export const PIE_COLORS: Record<string, string> = {
+  // Count API keys
+  toDoTasks:        '#90A4AE',
+  inProgressTasks:  '#2196F3',
+  inReviewTasks:    '#9C27B0',
+  completedTasks:   '#4CAF50',
+  // Percent API keys
+  toDoPercent:      '#90A4AE',
+  inProgressPercent:'#2196F3',
+  inReviewPercent:  '#9C27B0',
+  completedPercent: '#4CAF50',
+  // Direct TaskStatus keys (fallback)
+  TODO:             '#90A4AE',
+  IN_PROGRESS:      '#2196F3',
+  REVIEW:           '#9C27B0',
+  DONE:             '#4CAF50',
+};
+
+export const PIE_FALLBACK_PALETTE = [
+  '#FF7043', '#26C6DA', '#FFCA28', '#EC407A',
+  '#78909C', '#8D6E63', '#66BB6A', '#FFA726',
+];
+
 export const PRIORITY_COLORS: Record<TasksPriority, { bg: string; color: string }> = {
   'CRITICAL': { bg: '#ffebee', color: '#c62828' },
   'HIGH':     { bg: '#fff3e0', color: '#e65100' },

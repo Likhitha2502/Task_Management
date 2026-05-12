@@ -4,6 +4,7 @@ import { createEpicMiddleware } from 'redux-observable';
 
 import authReducer from '../features/auth/authSlice';
 import profileReducer from '../features/profile/profileSlice';
+import progressReducer from '../features/progress/progressSlice';
 import { rootEpic } from '../features/rootEpic';
 import tasksReducer from '../features/tasks/tasksSlice';
 import toastReducer from '../features/toast/toastSlice';
@@ -15,6 +16,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     profile: profileReducer,
+    progress: progressReducer,
     tasks: tasksReducer,
     toast: toastReducer,
   },
