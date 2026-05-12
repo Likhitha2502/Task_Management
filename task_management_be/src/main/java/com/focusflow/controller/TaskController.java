@@ -27,7 +27,7 @@ public class TaskController {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
-        task.setStatus(request.getStatus());
+        task.setStatus(request.getStatus().replace("_", " "));
         task.setDueDate(request.getDueDate());
         task.setUserEmail(authentication.getName());
 
@@ -53,7 +53,7 @@ public class TaskController {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
-        task.setStatus(request.getStatus());
+        task.setStatus(request.getStatus().replace("_", " "));
         task.setDueDate(request.getDueDate());
         task.setUserEmail(authentication.getName());
 
