@@ -1,6 +1,6 @@
 package com.focusflow;
 
-public class FocusFlowConstants {
+public final class FocusFlowConstants {
 
     public static final String TODO = "TODO";
     public static final String IN_PROGRESS = "IN PROGRESS";
@@ -32,5 +32,17 @@ public class FocusFlowConstants {
 
                         "— The TaskManagementK2G Team\n" +
                         "Doing productive things so you can pretend you are too";
+    }
+
+    public static String normalizeTaskStatus(String status) {
+
+        if (status == null) {
+            return null;
+        }
+
+        return status
+                .trim()
+                .replace("_", " ")
+                .toUpperCase();
     }
 }
