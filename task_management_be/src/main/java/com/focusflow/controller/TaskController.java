@@ -1,5 +1,6 @@
 package com.focusflow.controller;
 
+import com.focusflow.FocusFlowConstants;
 import com.focusflow.dto.CreateTaskRequest;
 import com.focusflow.entity.Task;
 import com.focusflow.service.TaskService;
@@ -27,7 +28,7 @@ public class TaskController {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
-        task.setStatus(request.getStatus().replace("_", " "));
+        task.setStatus(FocusFlowConstants.normalizeTaskStatus(request.getStatus()));
         task.setDueDate(request.getDueDate());
         task.setUserEmail(authentication.getName());
 
@@ -53,7 +54,7 @@ public class TaskController {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
-        task.setStatus(request.getStatus().replace("_", " "));
+        task.setStatus(FocusFlowConstants.normalizeTaskStatus(request.getStatus()));
         task.setDueDate(request.getDueDate());
         task.setUserEmail(authentication.getName());
 
