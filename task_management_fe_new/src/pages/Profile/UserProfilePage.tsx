@@ -6,7 +6,7 @@ import {
 Avatar,
   Box, Button, CircularProgress,
   IconButton, TextField, Typography, } from '@mui/material';
-import { equals, isNil } from 'ramda';
+import { equals } from 'ramda';
 
 import { profileFile } from '@/utils/profileFile';
 
@@ -161,7 +161,6 @@ export const UserProfilePage = () => {
 
         {/* Right — Change Password */}
         <Box className={classes.card}>
-          <Box className={classes.passwordIcon}>🔒</Box>
           <Typography className={classes.passwordCardTitle}>Change Password</Typography>
           <Typography className={classes.passwordHint}>
             For your security, we recommend using a strong password

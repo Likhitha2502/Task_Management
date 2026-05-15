@@ -50,10 +50,11 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
 
   const error = useSelector(selectors.tasks.getError);
   const [form, setForm] = useState<CreateTaskPayload>({
-    title:     '',
-    status:   'TODO',
-    priority: 'MEDIUM',
-    dueDate:  '',
+    title:       '',
+    description: null,
+    status:      'TODO',
+    priority:    'MEDIUM',
+    dueDate:     '',
   });
 
   const handleChange = useCallback((field: keyof CreateTaskPayload, value: string) => {
@@ -62,7 +63,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
   }, [error]);
 
   const handleClose = useCallback(() => {
-    setForm({ title: '', status: 'TODO', priority: 'MEDIUM', dueDate: '' });
+    setForm({ title: '', description: null, status: 'TODO', priority: 'MEDIUM', dueDate: '' });
     onClose();
   }, [onClose]);
 
@@ -95,6 +96,17 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
             fullWidth size="small" placeholder="Enter task title"
             value={form.title} sx={fieldSx}
             onChange={(e) => handleChange('title', e.target.value)}
+          />
+        </div>
+
+        {/* Description */}
+        <div style={{ marginBottom: '20px' }}>
+          <Typography style={labelStyle}>Description <span style={{ fontWeight: 400, color: '#bbb' }}>(optional)</span></Typography>
+          <TextField
+            fullWidth multiline minRows={2} maxRows={4}
+            placeholder="Add a description…"
+            value={form.description ?? ''} sx={fieldSx}
+            onChange={(e) => handleChange('description', e.target.value || null as any)}
           />
         </div>
 
@@ -136,7 +148,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
           <TextField
             fullWidth size="small" type="date"
             value={form.dueDate} sx={fieldSx}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             onChange={(e) => handleChange('dueDate', e.target.value)}
           />
         </div>

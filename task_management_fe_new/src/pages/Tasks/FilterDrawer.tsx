@@ -14,7 +14,7 @@ import { PRIORITIES, STATUSES, type TaskFilters, type TasksPriority,type TaskSta
 
 type Props = { open: boolean; onClose: () => void };
 
-const EMPTY_FILTERS: TaskFilters = { status: [], priority: [], dueDateFrom: null, dueDateTo: null };
+const EMPTY_FILTERS: TaskFilters = { status: [], priority: [], dueDateFrom: null, dueDateTo: null, titleSearch: null };
 
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v) => b.includes(v));
@@ -30,11 +30,14 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
     if (open) setDraft(appliedFilters);
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const titleSearchValid = !draft.titleSearch || draft.titleSearch.length >= 3;
+
   const draftIsDirty =
     !arraysEqual(draft.status, appliedFilters.status) ||
     !arraysEqual(draft.priority, appliedFilters.priority) ||
-    draft.dueDateFrom !== appliedFilters.dueDateFrom ||
-    draft.dueDateTo   !== appliedFilters.dueDateTo;
+    draft.dueDateFrom  !== appliedFilters.dueDateFrom ||
+    draft.dueDateTo    !== appliedFilters.dueDateTo   ||
+    draft.titleSearch  !== appliedFilters.titleSearch;
 
   const toggleStatus = useCallback((status: TaskStatus) => {
     setDraft((prev) => ({
@@ -73,7 +76,7 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}
-      PaperProps={{ style: { width: 300, padding: '24px', display: 'flex', flexDirection: 'column', gap: '0' } }}
+      slotProps={{ paper: { style: { width: 300, padding: '24px', display: 'flex', flexDirection: 'column', gap: '0' } } }}
     >
       {/* Header */}
       <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -176,11 +179,25 @@ export const FilterDrawer = ({ open, onClose }: Props) => {
         </Box>
       </Box>
 
+      <Divider style={{ marginBottom: '24px' }} />
+
+      {/* Title search */}
+      <Typography style={sectionLabel}>Title</Typography>
+      <TextField
+        fullWidth size="small"
+        placeholder="Search by title…"
+        value={draft.titleSearch ?? ''}
+        onChange={(e) => setDraft((prev) => ({ ...prev, titleSearch: e.target.value || null }))}
+        error={!titleSearchValid}
+        helperText={!titleSearchValid ? 'Enter at least 3 characters' : ''}
+        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '13px', fontFamily: 'Georgia, serif' }, marginBottom: '32px' }}
+      />
+
       {/* Apply */}
-      <Button fullWidth variant="contained" onClick={handleApply} disabled={!draftIsDirty}
+      <Button fullWidth variant="contained" onClick={handleApply} disabled={!draftIsDirty || !titleSearchValid}
         style={{
-          backgroundColor: draftIsDirty ? CORAL : '#e0e0e0',
-          color: draftIsDirty ? '#fff' : '#aaa',
+          backgroundColor: (draftIsDirty && titleSearchValid) ? CORAL : '#e0e0e0',
+          color: (draftIsDirty && titleSearchValid) ? '#fff' : '#aaa',
           borderRadius: '8px', textTransform: 'none',
           fontFamily: 'Georgia, serif', fontWeight: 600, fontSize: '14px',
         }}

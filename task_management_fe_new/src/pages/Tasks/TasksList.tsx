@@ -26,8 +26,8 @@ SortDirection,
 SortField,   Task, } from '../../models/task';
 
 type SelectedTask =
-  | { mode: 'edit'; task: Task }
-  | { mode: 'delete'; task: Task }
+  | { mode: 'edit';   id: number }
+  | { mode: 'delete'; id: number }
   | null;
 
 const SortIcon = ({ active, direction }: { active: boolean; direction: SortDirection }) => {
@@ -72,22 +72,22 @@ export const TasksList = () => {
 
   const handleSaveEdit = useCallback((data: Partial<Omit<Task, 'id'>>) => {
     if (selectedTask?.mode !== 'edit') return;
-    // Pass full task DTO — id from selectedTask, updated fields from EditRow draft
-    boundActions.tasks.updateTaskRequest({ id: selectedTask.task.id, data });
+    boundActions.tasks.updateTaskRequest({ id: selectedTask.id, data });
   }, [selectedTask]);
 
   const handleConfirmDelete = useCallback(() => {
     if (selectedTask?.mode !== 'delete') return;
-    // Pass only the id to the delete API
-    boundActions.tasks.deleteTaskRequest({ id: selectedTask.task.id });
+    boundActions.tasks.deleteTaskRequest({ id: selectedTask.id });
   }, [selectedTask]);
 
   const activeFilterCount =
     filters.status.length + filters.priority.length +
-    (filters.dueDateFrom ? 1 : 0) + (filters.dueDateTo ? 1 : 0);
+    (filters.dueDateFrom ? 1 : 0) + (filters.dueDateTo ? 1 : 0) +
+    (filters.titleSearch ? 1 : 0);
 
   const columns: { label: string; field: SortField }[] = [
     { label: 'Task', field: 'title' },
+    { label: 'Description', field: 'description' },
     { label: 'Status', field: 'status' },
     { label: 'Priority', field: 'priority' },
     { label: 'Due Date', field: 'dueDate' },
@@ -150,6 +150,11 @@ export const TasksList = () => {
               onDelete={() => boundActions.tasks.setFilters({ dueDateTo: null })}
               style={{ fontFamily: 'Georgia, serif', fontSize: '12px' }} />
           )}
+          {filters.titleSearch && (
+            <Chip label={`Title: "${filters.titleSearch}"`} size="small"
+              onDelete={() => boundActions.tasks.setFilters({ titleSearch: null })}
+              style={{ fontFamily: 'Georgia, serif', fontSize: '12px' }} />
+          )}
         </Box>
       )}
 
@@ -195,6 +200,8 @@ export const TasksList = () => {
           <Box key={task.id} className={cx(classes.tableRow, classes.tableGrid)}>
             <Typography className={classes.taskName}>{task.title}</Typography>
 
+            <Typography className={classes.taskName}>{task.description || '—'}</Typography>
+
             <Chip label={task.status} size="small" className={classes.chip}
               style={{ backgroundColor: STATUS_COLORS[task.status]?.bg, color: STATUS_COLORS[task.status]?.color }} />
 
@@ -209,14 +216,14 @@ export const TasksList = () => {
             <Box className={classes.rowActions}>
               <Tooltip title="Edit">
                 <Button size="small" className={classes.actionBtn}
-                  onClick={() => setSelectedTask({ mode: 'edit', task })}>
+                  onClick={() => setSelectedTask({ mode: 'edit', id: task.id })}>
                   Edit
                 </Button>
               </Tooltip>
               <Tooltip title="Delete">
                 <IconButton size="small" className={classes.actionBtn}
                   disabled={deleteLoader}
-                  onClick={() => setSelectedTask({ mode: 'delete', task })}>
+                  onClick={() => setSelectedTask({ mode: 'delete', id: task.id })}>
                   {deleteLoader
                     ? <CircularProgress size={14} style={{ color: '#d32f2f' }} />
                     : <Delete style={{ fontSize: 16, color: '#ccc' }} />}
@@ -232,14 +239,16 @@ export const TasksList = () => {
       <FilterDrawer open={filterOpen} onClose={() => setFilterOpen(false)} />
 
       <EditTaskDialog
-        task={selectedTask?.mode === 'edit' ? selectedTask.task : null}
+        taskId={selectedTask?.mode === 'edit' ? selectedTask.id : null}
         saving={updateLoader}
         onSave={handleSaveEdit}
         onClose={() => setSelectedTask(null)}
       />
 
       <DeleteTaskDialog
-        task={selectedTask?.mode === 'delete' ? selectedTask.task : null}
+        task={selectedTask?.mode === 'delete'
+          ? (tasks.find((t) => t.id === selectedTask.id) ?? null)
+          : null}
         deleting={deleteLoader}
         onConfirm={handleConfirmDelete}
         onCancel={() => setSelectedTask(null)}

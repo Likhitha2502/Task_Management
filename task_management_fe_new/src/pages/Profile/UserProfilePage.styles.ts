@@ -59,17 +59,16 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
   cardTitle: {
     fontFamily: 'Georgia, serif',
     fontWeight: 700,
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#1a1a1a',
-    marginBottom: '4px',
-    textAlign: 'center' as const,
+    marginBottom: '6px',
   },
   cardSubtitle: {
     fontFamily: 'Georgia, serif',
-    fontSize: '12px',
-    color: '#999',
+    fontSize: '12.5px',
+    color: '#888',
+    fontStyle: 'italic' as const,
     marginBottom: '24px',
-    textAlign: 'center' as const,
   },
 
   // ── Avatar ─────────────────────────────────────────────────────────────────
@@ -138,18 +137,17 @@ export const useUserProfileStyles = makeStyles({ name: 'UserProfile' })({
   passwordCardTitle: {
     fontFamily: 'Georgia, serif',
     fontWeight: 700,
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#1a1a1a',
-    marginBottom: '4px',
-    textAlign: 'center' as const,
+    marginBottom: '6px',
   },
   passwordHint: {
-    fontSize: '13px',
-    color: '#999',
+    fontSize: '12.5px',
+    color: '#888',
     fontFamily: 'Georgia, serif',
+    fontStyle: 'italic' as const,
     lineHeight: 1.6,
     marginBottom: '28px',
-    textAlign: 'center' as const,
   },
 });
 

@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+
 import { boundActions, selectors } from '@/app/index';
 
 import { useFocusTimerStyles } from './FocusTimerPage.styles';
@@ -10,10 +19,12 @@ export const FocusTimerPage = () => {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(30);
   const [minutesError, setMinutesError] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const postStatus = useSelector(selectors.focusTimer.postStatus);
-  const isLoading  = useSelector(selectors.focusTimer.isLoading);
-  const error      = useSelector(selectors.focusTimer.error);
+  const postStatus  = useSelector(selectors.focusTimer.postStatus);
+  const isLoading   = useSelector(selectors.focusTimer.isLoading);
+  const error       = useSelector(selectors.focusTimer.error);
+  const timerStatus = useSelector(selectors.focusTimer.timerStatus);
 
   useEffect(() => {
     if (postStatus === 'success') {
@@ -36,9 +47,22 @@ export const FocusTimerPage = () => {
     return true;
   };
 
+  const dispatchStart = () => {
+    boundActions.focusTimer.startFocusTimerRequest({ durationMinutes: hours * 60 + minutes });
+  };
+
   const handleSubmit = () => {
     if (!validate()) return;
-    boundActions.focusTimer.startFocusTimerRequest({ durationMinutes: hours * 60 + minutes });
+    if (timerStatus?.active) {
+      setConfirmOpen(true);
+      return;
+    }
+    dispatchStart();
+  };
+
+  const handleConfirm = () => {
+    setConfirmOpen(false);
+    dispatchStart();
   };
 
   const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +128,50 @@ export const FocusTimerPage = () => {
           {isLoading.post ? 'Starting...' : 'Start Timer'}
         </button>
       </div>
+
+      {/* ── Override confirmation dialog ──────────────────────────────────── */}
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontFamily: 'Georgia, serif', fontWeight: 700, pb: 1 }}>
+          Replace Active Focus Session?
+        </DialogTitle>
+
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily: 'Georgia, serif', color: '#444', lineHeight: 1.6 }}>
+            You have a focus session currently in progress. Starting a new timer
+            will immediately end the active session and replace it with the new
+            duration. This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button
+            onClick={() => setConfirmOpen(false)}
+            variant="outlined"
+            color="inherit"
+            sx={{ fontFamily: 'Georgia, serif', textTransform: 'none', borderColor: '#ddd', color: '#555' }}
+          >
+            Keep Current Session
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            variant="contained"
+            autoFocus
+            sx={{
+              fontFamily: 'Georgia, serif',
+              textTransform: 'none',
+              backgroundColor: '#D35F55',
+              '&:hover': { backgroundColor: '#be5249' },
+            }}
+          >
+            Replace Session
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

@@ -13,11 +13,13 @@ import type { Epic} from 'redux-observable';
 
 export interface TaskState {
   tasks:     Task[];
+  fetchedTask: Task | null;
   loading:   {
     list: boolean;
     create: boolean;
     update: boolean;
     delete: boolean;
+    fetchById: boolean;
   },
   filters:   TaskFilters;
   sort: {
@@ -31,20 +33,23 @@ export interface TaskState {
 // ─── Initial State ────────────────────────────────────────────────────────────
 
 const initialState: TaskState = {
-  tasks:   [],
+  tasks:       [],
+  fetchedTask: null,
   loading: {
-    list: false,
-    create: false,
-    update: false,
-    delete: false,
+    list:      false,
+    create:    false,
+    update:    false,
+    delete:    false,
+    fetchById: false,
   },
   status: null,
-  error:   null,
+  error:  null,
   filters: {
-    status:      [],
-    priority:    [],
-    dueDateFrom: null,
-    dueDateTo:   null,
+    status:            [],
+    priority:          [],
+    dueDateFrom:       null,
+    dueDateTo:         null,
+    titleSearch: null,
   },
   sort: {
     field:     'dueDate',
@@ -126,6 +131,25 @@ const taskSlice = createSlice({
       state.sort = action.payload;
     },
 
+    // ── Fetch by ID ───────────────────────────────────────────────────────────
+    fetchTaskByIdRequest(state, _action: PayloadAction<number>) {
+      state.loading.fetchById = true;
+      state.fetchedTask       = null;
+      state.error             = null;
+    },
+    fetchTaskByIdSuccess(state, action: PayloadAction<Task>) {
+      state.loading.fetchById = false;
+      state.fetchedTask       = action.payload;
+    },
+    fetchTaskByIdFailure(state, action: PayloadAction<string>) {
+      state.loading.fetchById = false;
+      state.error             = action.payload;
+    },
+    clearFetchedTask(state) {
+      state.fetchedTask       = null;
+      state.loading.fetchById = false;
+    },
+
     clearTasksErrors(state) {
       state.error = initialState.error;
     },
@@ -152,7 +176,9 @@ const PRIORITY_ORDER: Record<TasksPriority, number> = {
 };
 
 export const taskSelectors = {
-  isLoading:   createDraftSafeSelector(selectTaskState, (s) => s.loading),
+  isLoading:      createDraftSafeSelector(selectTaskState, (s) => s.loading),
+  fetchByIdLoading: createDraftSafeSelector(selectTaskState, (s) => s.loading.fetchById),
+  fetchedTask:    createDraftSafeSelector(selectTaskState, (s) => s.fetchedTask),
   getError:       createDraftSafeSelector(selectTaskState, (s) => s.error),
   filters:     createDraftSafeSelector(selectTaskState, (s) => s.filters),
   sort:        createDraftSafeSelector(selectTaskState, (s) => s.sort),
@@ -172,6 +198,10 @@ export const taskSelectors = {
       result = result.filter((t) => t.dueDate >= s.filters.dueDateFrom!);
     if (s.filters.dueDateTo)
       result = result.filter((t) => t.dueDate <= s.filters.dueDateTo!);
+    if (s.filters.titleSearch)
+      result = result.filter((t) =>
+        t.title.toLowerCase().includes(s.filters.titleSearch!.toLowerCase())
+      );
 
     // Sort
     result.sort((a, b) => {
@@ -182,6 +212,8 @@ export const taskSelectors = {
         cmp = a.title.localeCompare(b.title);
       } else if (s.sort.field === 'status') {
         cmp = a.status.localeCompare(b.status);
+      } else if (s.sort.field === 'description') {
+        cmp = (a.description ?? '').localeCompare(b.description ?? '');
       } else {
         cmp = a.dueDate.localeCompare(b.dueDate);
       }
@@ -195,7 +227,8 @@ export const taskSelectors = {
     s.filters.status.length > 0 ||
     s.filters.priority.length > 0 ||
     s.filters.dueDateFrom !== null ||
-    s.filters.dueDateTo !== null
+    s.filters.dueDateTo !== null ||
+    !!s.filters.titleSearch
   ),
 };
 
@@ -262,4 +295,17 @@ const deleteTaskEpic: Epic = (action$) =>
     )
   );
 
-export const taskEpics = combineEpics(fetchTasksEpic, createTaskEpic, updateTaskEpic, deleteTaskEpic);
+const fetchTaskByIdEpic: Epic = (action$) =>
+  action$.pipe(
+    ofType(taskSliceActions.fetchTaskByIdRequest.type),
+    switchMap(({ payload: id }: { type: string; payload: number }) =>
+      from(http.get<Task>(api.tasks.getById(id))).pipe(
+        map((res) => taskSliceActions.fetchTaskByIdSuccess(res.data)),
+        catchError((err) => of(taskSliceActions.fetchTaskByIdFailure(
+          err?.response?.data?.message || 'Failed to load task.'
+        )))
+      )
+    )
+  );
+
+export const taskEpics = combineEpics(fetchTasksEpic, createTaskEpic, updateTaskEpic, deleteTaskEpic, fetchTaskByIdEpic);

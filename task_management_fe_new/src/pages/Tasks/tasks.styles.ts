@@ -29,8 +29,8 @@ export const useTaskStyles = makeStyles()({
     border: '1px solid #ebebeb', overflow: 'hidden',
     boxShadow: '0 2px 16px rgba(0,0,0,0.05)', width: '100%',
   },
-  // Task | Status | Priority | Due Date | Actions
-  tableGrid: { gridTemplateColumns: '3fr 1.2fr 1.2fr 1.2fr 110px' },
+  // Task | Description | Status | Priority | Due Date | Actions
+  tableGrid: { gridTemplateColumns: '2fr 2fr 1fr 1fr 1.2fr 100px' },
 
   tableHead: {
     display: 'grid', padding: '10px 24px',
