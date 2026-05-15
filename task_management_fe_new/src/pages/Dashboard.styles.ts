@@ -278,6 +278,28 @@ export const useDashboardStyles = makeStyles()({
     zIndex: 10,
   },
 
+  // ── Focus Timer header button ─────────────────────────────────────────────
+  focusTimerHeaderBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    border: `1px solid ${CORAL}`,
+    borderRadius: '8px',
+    padding: '7px 14px',
+    fontSize: '12.5px',
+    fontWeight: 600,
+    fontFamily: 'Georgia, serif',
+    cursor: 'pointer',
+    color: CORAL,
+    backgroundColor: 'transparent',
+    flexShrink: 0,
+  },
+  focusTimerHeaderBtnActive: {
+    backgroundColor: CORAL,
+    color: '#fff',
+    animation: 'focusTimerPulse 1.5s ease-in-out infinite',
+  },
+
   // ── Content ───────────────────────────────────────────────────────────────
   content: {
     flex: 1,

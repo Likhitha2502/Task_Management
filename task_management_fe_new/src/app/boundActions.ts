@@ -4,6 +4,9 @@ import {
     authSliceActions
 } from '../features/auth/authSlice';
 import {
+    focusTimerSliceActions
+} from '../features/focusTimer/focusTimerSlice';
+import {
     profileSliceActions
 } from '../features/profile/profileSlice';
 import {
@@ -20,6 +23,10 @@ import { store } from './store';
 export const boundActions = {
     auth: bindActionCreators(
         authSliceActions,
+        store.dispatch
+    ),
+    focusTimer: bindActionCreators(
+        focusTimerSliceActions,
         store.dispatch
     ),
     profile: bindActionCreators(

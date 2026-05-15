@@ -62,6 +62,7 @@ function AppRoutes() {
       {/* Protected — view prop tells DashboardPage what to render */}
       <Route path={ROUTES.tasks} element={<PrivateRoute><DashboardPage view="tasks" /></PrivateRoute>} />
       <Route path={ROUTES.progress} element={<PrivateRoute><DashboardPage view="progress" /></PrivateRoute>} />
+      <Route path={ROUTES.focusTimer} element={<PrivateRoute><DashboardPage view="focusTimer" /></PrivateRoute>} />
       <Route path={ROUTES.userProfile} element={<PrivateRoute><UserProfilePage /></PrivateRoute>} />
 
       <Route path="*" element={<Navigate to={ROUTES.auth.login} replace />} />

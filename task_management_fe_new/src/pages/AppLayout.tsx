@@ -15,18 +15,21 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const { classes, cx } = useDashboardStyles();
   const navigate = useNavigate();
   const location = useLocation();
-  const activeNav = location.pathname === ROUTES.tasks    ? 'tasks'
-                  : location.pathname === ROUTES.progress ? 'progress'
+  const activeNav = location.pathname === ROUTES.tasks      ? 'tasks'
+                  : location.pathname === ROUTES.progress   ? 'progress'
+                  : location.pathname === ROUTES.focusTimer ? 'focusTimer'
                   : null;
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const currentUser = useSelector(selectors.profile.userProfile);
+  const currentUser  = useSelector(selectors.profile.userProfile);
+  const timerStatus  = useSelector(selectors.focusTimer.timerStatus);
   const initials = currentUser?.firstName && currentUser?.lastName
     ? `${currentUser.firstName[0]}${currentUser.lastName[0]}`.toUpperCase()
     : 'U';
 
   useEffect(() => {
     boundActions.profile.fetchUserProfileRequest();
+    boundActions.focusTimer.fetchFocusTimerRequest();
   }, []);
 
   const handleLogout = () => {
@@ -35,6 +38,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className={classes.root}>
+      {/* Keyframe for blinking focus timer button */}
+      <style>{`
+        @keyframes focusTimerPulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.55; }
+        }
+      `}</style>
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside className={classes.sidebar}>
@@ -53,7 +63,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         <p className={classes.navLabel}>MY WORKSPACE</p>
 
         <nav className={classes.nav}>
-          {/* My Tasks — highlighted when pathname === /tasks */}
+          {/* My Tasks */}
           <button
             className={cx(classes.navItem, activeNav === 'tasks' && classes.navItemActive)}
             onClick={() => navigate(ROUTES.tasks)}
@@ -62,13 +72,22 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             My Tasks
           </button>
 
-          {/* Progress — highlighted when pathname === /progress */}
+          {/* Progress */}
           <button
             className={cx(classes.navItem, activeNav === 'progress' && classes.navItemActive)}
             onClick={() => navigate(ROUTES.progress)}
           >
             <span className={classes.navIcon}>▶</span>
             Progress
+          </button>
+
+          {/* Focus Timer */}
+          <button
+            className={cx(classes.navItem, activeNav === 'focusTimer' && classes.navItemActive)}
+            onClick={() => navigate(ROUTES.focusTimer)}
+          >
+            <span className={classes.navIcon}>⏱</span>
+            Focus Timer
           </button>
         </nav>
       </aside>
@@ -78,6 +97,18 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
         <header className={classes.header}>
           <div className={classes.headerSpacer} />
+
+          {/* Focus Timer status button */}
+          <button
+            className={cx(
+              classes.focusTimerHeaderBtn,
+              timerStatus?.active && classes.focusTimerHeaderBtnActive,
+            )}
+            onClick={() => navigate(ROUTES.focusTimer)}
+            title={timerStatus?.active ? `Timer active · ${timerStatus.remainingMinutes} min` : 'Focus Timer'}
+          >
+            Focus Timer
+          </button>
 
           {/* Profile dropdown */}
           <div className={classes.profileWrapper}>

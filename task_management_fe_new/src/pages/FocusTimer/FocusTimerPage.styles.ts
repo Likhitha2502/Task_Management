@@ -1,0 +1,132 @@
+import { makeStyles } from 'tss-react/mui';
+
+import { CORAL } from '@/models/color';
+
+export const useFocusTimerStyles = makeStyles()({
+  root: {
+    maxWidth: 600,
+  },
+  section: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    border: '1px solid #ebebeb',
+    padding: '28px 32px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+  },
+  sectionTitle: {
+    margin: '0 0 6px',
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#1a1a1a',
+    fontFamily: 'Georgia, serif',
+  },
+  helperText: {
+    margin: '0 0 24px',
+    fontSize: '12.5px',
+    color: '#888',
+    fontFamily: 'Georgia, serif',
+    fontStyle: 'italic' as const,
+  },
+  formRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    flexWrap: 'wrap' as const,
+  },
+  timerLabel: {
+    fontSize: '14px',
+    color: '#444',
+    fontFamily: 'Georgia, serif',
+    fontWeight: 600,
+    minWidth: '48px',
+  },
+  dropdownGroup: {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    gap: '8px',
+  },
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    gap: '8px',
+  },
+  select: {
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    padding: '9px 12px',
+    fontSize: '14px',
+    fontFamily: 'Georgia, serif',
+    color: '#333',
+    backgroundColor: '#fff',
+    cursor: 'pointer',
+    minWidth: '88px',
+    outline: 'none',
+    '&:focus': {
+      borderColor: CORAL,
+      boxShadow: `0 0 0 2px rgba(211,95,85,0.15)`,
+    },
+  },
+  numberInput: {
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    padding: '9px 12px',
+    fontSize: '14px',
+    fontFamily: 'Georgia, serif',
+    color: '#333',
+    backgroundColor: '#fff',
+    width: '88px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+    '&:focus': {
+      borderColor: CORAL,
+      boxShadow: `0 0 0 2px rgba(211,95,85,0.15)`,
+    },
+    '&:disabled': {
+      backgroundColor: '#f5f5f5',
+      color: '#bbb',
+      cursor: 'not-allowed',
+      borderColor: '#e8e8e8',
+    },
+  },
+  unitLabel: {
+    fontSize: '11px',
+    color: '#999',
+    fontFamily: 'Georgia, serif',
+    letterSpacing: '0.04em',
+  },
+  errorText: {
+    color: '#d32f2f',
+    fontSize: '12.5px',
+    margin: '12px 0 0',
+    fontFamily: 'Georgia, serif',
+  },
+  successText: {
+    color: '#2e7d32',
+    fontSize: '12.5px',
+    margin: '12px 0 0',
+    fontFamily: 'Georgia, serif',
+  },
+  submitBtn: {
+    marginTop: '28px',
+    display: 'block',
+    backgroundColor: CORAL,
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '10px 28px',
+    fontSize: '13.5px',
+    fontWeight: 600,
+    fontFamily: 'Georgia, serif',
+    cursor: 'pointer',
+    transition: 'opacity 0.15s',
+    '&:disabled': {
+      opacity: 0.6,
+      cursor: 'not-allowed',
+    },
+    '&:hover:not(:disabled)': {
+      opacity: 0.88,
+    },
+  },
+});

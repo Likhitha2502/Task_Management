@@ -27,4 +27,8 @@ export const api = {
     count:   '/progress/count',
     percent: '/progress/percent',
   },
+  focusTimer: {
+    get:  '/focus-timer',
+    post: '/focus-timer',
+  },
 };

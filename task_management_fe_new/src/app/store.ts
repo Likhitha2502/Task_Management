@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { createEpicMiddleware } from 'redux-observable';
 
 import authReducer from '../features/auth/authSlice';
+import focusTimerReducer from '../features/focusTimer/focusTimerSlice';
 import profileReducer from '../features/profile/profileSlice';
 import progressReducer from '../features/progress/progressSlice';
 import { rootEpic } from '../features/rootEpic';
@@ -15,6 +16,7 @@ const epicMiddleware = createEpicMiddleware();
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    focusTimer: focusTimerReducer,
     profile: profileReducer,
     progress: progressReducer,
     tasks: tasksReducer,

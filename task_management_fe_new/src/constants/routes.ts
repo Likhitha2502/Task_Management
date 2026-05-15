@@ -7,5 +7,6 @@ export const ROUTES = {
     },
     tasks: '/tasks',
     progress: '/progress',
+    focusTimer: '/focus-timer',
     userProfile: '/user-profile',
 };

@@ -83,6 +83,11 @@ const TOAST_MAP: Record<string, ToastConfig> = {
   // Progress
   'progress/fetchCountFailure':   { message: null, severity: 'error' },
   'progress/fetchPercentFailure': { message: null, severity: 'error' },
+
+  // Focus Timer
+  'focusTimer/startFocusTimerSuccess': { message: 'Focus timer activated',   severity: 'success' },
+  'focusTimer/startFocusTimerFailure': { message: null,                      severity: 'error'   },
+  'focusTimer/focusTimerDeactivated':  { message: 'Focus timer session ended', severity: 'info'  },
 };
 
 // ─── Epic ─────────────────────────────────────────────────────────────────────
