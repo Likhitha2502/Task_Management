@@ -75,11 +75,13 @@ const mockUpdatePayload: UpdateTaskPayload = {
 
 const initialState: TaskState = {
   tasks: [],
+  fetchedTask: null,
   loading: {
     list: false,
     create: false,
     update: false,
     delete: false,
+    fetchById: false,
   },
   status: null,
   error: null,
@@ -88,6 +90,7 @@ const initialState: TaskState = {
     priority: [],
     dueDateFrom: null,
     dueDateTo: null,
+    titleSearch: null,
   },
   sort: {
     field: 'dueDate',
@@ -320,15 +323,15 @@ describe('taskSelectors', () => {
   describe('isLoading', () => {
     it('returns all loading flags as false initially', () => {
       expect(taskSelectors.isLoading(makeRootState() as any)).toEqual({
-        list: false, create: false, update: false, delete: false,
+        list: false, create: false, update: false, delete: false, fetchById: false,
       });
     });
     it('returns correct state when list is loading', () => {
       expect(
         taskSelectors.isLoading(
-          makeRootState({ loading: { list: true, create: false, update: false, delete: false } }) as any
+          makeRootState({ loading: { list: true, create: false, update: false, delete: false, fetchById: false } }) as any
         )
-      ).toEqual({ list: true, create: false, update: false, delete: false });
+      ).toEqual({ list: true, create: false, update: false, delete: false, fetchById: false });
     });
   });
 
