@@ -15,8 +15,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleBadRequest(BadRequestException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        log.error("Unhandled exception occurred", ex);
-        response.put("message", "Unexpected internal server error");
+        log.warn("Bad request: {}", ex.getMessage());
+        response.put("message", ex.getMessage());
         return response;
     }
 
@@ -24,16 +24,16 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Map<String, Object> handleUnauthorized(UnauthorizedException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
-        log.error("Unhandled exception occurred", ex);
-        response.put("message", "Unexpected internal server error");
+        log.warn("Unauthorized request: {}", ex.getMessage());
+        response.put("message", ex.getMessage());
         return response;
     }
-
 
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleInvalidJson(Exception ex) {
         Map<String, Object> response = new LinkedHashMap<>();
+        log.warn("Invalid request format: {}", ex.getMessage());
         response.put("message", "Invalid request format (check date format or JSON)");
         return response;
     }
@@ -46,5 +46,4 @@ public class GlobalExceptionHandler {
         response.put("message", "Unexpected internal server error");
         return response;
     }
-
 }
