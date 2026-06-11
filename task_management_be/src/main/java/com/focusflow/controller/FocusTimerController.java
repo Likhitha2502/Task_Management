@@ -5,6 +5,7 @@ import com.focusflow.dto.FocusTimerResponse;
 import com.focusflow.dto.FocusTimerUpdateResponse;
 import com.focusflow.entity.FocusTimer;
 import com.focusflow.repository.FocusTimerRepository;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class FocusTimerController {
 
     @PostMapping
     public FocusTimerUpdateResponse setFocusTimer(Authentication authentication,
-                                                  @RequestBody FocusTimerRequest request) {
+                                                  @Valid @RequestBody FocusTimerRequest request) {
 
         String email = authentication.getName();
 
@@ -48,10 +49,7 @@ public class FocusTimerController {
         focusTimer.setUserEmail(email);
         focusTimer.setActive(true);
         focusTimer.setDurationMinutes(durationMinutes);
-        focusTimer.setEndTime(
-                LocalDateTime.now()
-                        .plusMinutes(durationMinutes)
-        );
+        focusTimer.setEndTime(LocalDateTime.now().plusMinutes(durationMinutes));
 
         focusTimerRepository.save(focusTimer);
 

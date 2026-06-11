@@ -1,6 +1,5 @@
 package com.focusflow.controller;
 
-import com.focusflow.controller.AuthController;
 import com.focusflow.dto.ForgotPasswordRequest;
 import com.focusflow.dto.LoginRequest;
 import com.focusflow.dto.RegisterRequest;

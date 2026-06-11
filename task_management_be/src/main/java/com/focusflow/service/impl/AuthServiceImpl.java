@@ -136,6 +136,9 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("Updating profile for user: {}", email);
 
+        validateMaxLength(firstName, "First name");
+        validateMaxLength(lastName, "Last name");
+
         if (firstName != null && !firstName.isBlank()) {
             user.setFirstName(firstName);
         }
@@ -263,6 +266,12 @@ public class AuthServiceImpl implements AuthService {
         response.put("email", user.getEmail());
         response.put("forceLogout", true);
         return response;
+    }
+
+    private void validateMaxLength(String fieldValue, String fieldName) {
+        if (fieldValue != null && fieldValue.length() > 255) {
+            throw new BadRequestException(fieldName + " must be 255 characters or less");
+        }
     }
 
    /* @Override

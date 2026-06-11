@@ -1,29 +1,32 @@
 package com.focusflow.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.focusflow.util.MultiDateDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
 public class CreateTaskRequest {
 
-    @NotBlank
+    @NotBlank(message = "Task title is required")
+    @Size(max = 255, message = "Task title must be 255 characters or less")
     private String title;
 
+    @Size(max = 255, message = "Task description must be 255 characters or less")
     private String description;
 
-    @NotBlank
-    private String priority;
-
-    @NotBlank
+    @NotBlank(message = "Task status is required")
+    @Size(max = 255, message = "Task status must be 255 characters or less")
     private String status;
 
-    @NotNull
-    @JsonDeserialize(using = MultiDateDeserializer.class)
+    @NotBlank(message = "Task priority is required")
+    @Size(max = 255, message = "Task priority must be 255 characters or less")
+    private String priority;
+
+    @NotNull(message = "Due date is required")
     private LocalDate dueDate;
 
+ 
     // getters & setters
 
     public @NotBlank String getTitle() {

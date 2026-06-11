@@ -3,6 +3,7 @@ package com.focusflow.controller;
 import com.focusflow.dto.ProfileResponse;
 import com.focusflow.dto.ResetPasswordRequest;
 import com.focusflow.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,7 @@ public class ProfileController {
 
     @PutMapping("/change-password")
     public Map<String, Object> changePassword(Authentication authentication,
-                                              @RequestBody ResetPasswordRequest request) {
+                                              @Valid  @RequestBody ResetPasswordRequest request) {
         String email = authentication.getName();
         return authService.changePassword(email, request);
     }
