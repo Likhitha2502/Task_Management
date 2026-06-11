@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Tooltip } from '@mui/material';
 
 import { boundActions, selectors } from '@/app/index';
+import logoSrc from '@/assets/logo.svg';
 
 import { ROUTES } from '../constants/routes';
 import { useDashboardStyles } from './Dashboard.styles';
@@ -59,8 +60,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           style={{ cursor: 'pointer' }}
           onClick={() => navigate(ROUTES.tasks)}
         >
-          <div className={classes.logoAvatar}>F</div>
-          <span className={classes.logoText}>FocusFlow</span>
+          <img src={logoSrc} alt="ProcrastiNot" style={{ height: '40px', objectFit: 'contain' }} />
         </div>
 
         <div className={classes.sidebarDivider} />

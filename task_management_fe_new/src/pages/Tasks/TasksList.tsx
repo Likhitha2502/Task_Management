@@ -116,7 +116,7 @@ export const TasksList = () => {
             </IconButton>
           </Tooltip>
           <button className={classes.newTaskBtn} onClick={() => setNewTaskOpen(true)}>
-            + New Task
+            New Task
           </button>
         </Box>
       </Box>

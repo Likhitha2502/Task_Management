@@ -16,7 +16,7 @@ import { type CreateTaskPayload, PRIORITIES, STATUSES, type TasksPriority, type 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 const addTaskSchema = yup.object({
-  title:       yup.string().trim().required('Title is required').max(255, 'Title must be 255 characters or less'),
+  title:       yup.string().trim().required('Task title is required').max(255, 'Title must be 255 characters or less'),
   description: yup.string().nullable().max(255, 'Description must be 255 characters or less'),
   status:      yup.string().oneOf(STATUSES as string[], 'Status is required').required('Status is required'),
   priority:    yup.string().oneOf(PRIORITIES as string[], 'Priority is required').required('Priority is required'),
@@ -73,6 +73,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
   const formik = useFormik<FormValues>({
     initialValues: EMPTY_FORM,
     validationSchema: addTaskSchema,
+    validateOnMount: true,
     validateOnChange: false,
     validateOnBlur: true,
     onSubmit: (values) => {
@@ -95,7 +96,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
 
-  const saveDisabled = loading;
+  const saveDisabled = loading || !formik.isValid;
 
   return (
     <StyledDialog open={open} onClose={handleClose}>

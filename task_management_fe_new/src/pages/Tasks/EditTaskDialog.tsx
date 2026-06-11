@@ -35,7 +35,7 @@ type EditTaskDialogProps = {
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 const editTaskSchema = yup.object({
-  title:       yup.string().trim().required('Title is required').max(255, 'Title must be 255 characters or less'),
+  title:       yup.string().trim().required('Task title is required').max(255, 'Title must be 255 characters or less'),
   description: yup.string().nullable().max(255, 'Description must be 255 characters or less'),
   status:      yup.string().oneOf(STATUSES as string[], 'Status is required').required('Status is required'),
   priority:    yup.string().oneOf(PRIORITIES as string[], 'Priority is required').required('Priority is required'),
@@ -125,7 +125,7 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
 
-  const saveDisabled = !fetchedTask || !formik.dirty || saving || fetchLoading;
+  const saveDisabled = !fetchedTask || !formik.dirty || saving || fetchLoading || !formik.isValid;
 
   return (
     <StyledDialog open={taskId !== null} onClose={handleClose}>

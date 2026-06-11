@@ -1,9 +1,10 @@
- 
 import { useEffect,useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { Avatar, Box, Paper,Typography } from '@mui/material';
+import { Box, Paper,Typography } from '@mui/material';
+
+import logoSrc from '@/assets/logo.svg';
 
 import { ROUTES } from '@/constants';
 
@@ -43,10 +44,7 @@ const LoginPage = () => {
     <Box className={classes.pageWrapper}>
       <Paper className={classes.card}>
         <Box className={classes.logoContainer}>
-          <Avatar className={classes.logoAvatar}>F</Avatar>
-          <Typography variant="h5" className={classes.logoTitleTypography}>
-            FocusFlow
-          </Typography>
+          <img src={logoSrc} alt="ProcrastiNot" style={{ height: '60px', objectFit: 'contain' }} />
         </Box>
 
         <Box className={classes.headerContainer}>
