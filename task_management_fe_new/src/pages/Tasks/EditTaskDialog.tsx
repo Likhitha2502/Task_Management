@@ -162,12 +162,13 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
           <>
             {/* Title */}
             <div style={{ marginBottom: '20px' }}>
-              <Typography style={labelStyle}>Task title</Typography>
+              <Typography id="edit-title-label" style={labelStyle}>Task title</Typography>
               <TextField
                 fullWidth size="small"
                 placeholder="Enter task title"
                 value={formik.values.title}
                 sx={fieldSx}
+                slotProps={{ htmlInput: { 'aria-labelledby': 'edit-title-label' } }}
                 onChange={(e) => { formik.setFieldValue('title', e.target.value); boundActions.tasks.clearTasksErrors(); }}
                 onBlur={formik.handleBlur('title')}
                 error={formik.touched.title && Boolean(formik.errors.title)}
@@ -181,12 +182,13 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
 
             {/* Description */}
             <div style={{ marginBottom: '20px' }}>
-              <Typography style={labelStyle}>Description</Typography>
+              <Typography id="edit-description-label" style={labelStyle}>Description</Typography>
               <TextField
                 fullWidth multiline minRows={2} maxRows={4}
                 placeholder="Add a description…"
                 value={formik.values.description}
                 sx={fieldSx}
+                slotProps={{ htmlInput: { 'aria-labelledby': 'edit-description-label' } }}
                 onChange={(e) => formik.setFieldValue('description', e.target.value)}
               />
             </div>
@@ -194,7 +196,7 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
             {/* Status + Priority */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div>
-                <Typography style={labelStyle}>Status</Typography>
+                <Typography id="edit-status-label" style={labelStyle}>Status</Typography>
                 <Autocomplete
                   options={STATUSES}
                   value={formik.values.status || null}
@@ -205,11 +207,12 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
                   }}
                   onBlur={() => formik.setFieldTouched('status', true)}
                   size="small"
-                  renderInput={(params) => (
+                  renderInput={({ inputProps: acInputProps, ...params }) => (
                     <TextField
                       {...params}
                       placeholder="Select status"
                       sx={fieldSx}
+                      slotProps={{ htmlInput: { ...acInputProps, 'aria-labelledby': 'edit-status-label' } }}
                       error={formik.touched.status && Boolean(formik.errors.status)}
                     />
                   )}
@@ -222,7 +225,7 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
               </div>
 
               <div>
-                <Typography style={labelStyle}>Priority</Typography>
+                <Typography id="edit-priority-label" style={labelStyle}>Priority</Typography>
                 <Autocomplete
                   options={PRIORITIES}
                   value={formik.values.priority || null}
@@ -233,11 +236,12 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
                   }}
                   onBlur={() => formik.setFieldTouched('priority', true)}
                   size="small"
-                  renderInput={(params) => (
+                  renderInput={({ inputProps: acInputProps, ...params }) => (
                     <TextField
                       {...params}
                       placeholder="Select priority"
                       sx={fieldSx}
+                      slotProps={{ htmlInput: { ...acInputProps, 'aria-labelledby': 'edit-priority-label' } }}
                       error={formik.touched.priority && Boolean(formik.errors.priority)}
                     />
                   )}
@@ -252,12 +256,12 @@ export const EditTaskDialog = ({ taskId, saving, onSave, onClose }: EditTaskDial
 
             {/* Due Date */}
             <div>
-              <Typography style={labelStyle}>Due Date</Typography>
+              <Typography id="edit-due-date-label" style={labelStyle}>Due Date</Typography>
               <TextField
                 fullWidth size="small" type="date"
                 value={formik.values.dueDate}
                 sx={fieldSx}
-                slotProps={{ inputLabel: { shrink: true } }}
+                slotProps={{ inputLabel: { shrink: true }, htmlInput: { 'aria-labelledby': 'edit-due-date-label' } }}
                 onChange={(e) => { formik.setFieldValue('dueDate', e.target.value); formik.setFieldTouched('dueDate', true); boundActions.tasks.clearTasksErrors(); }}
                 onBlur={() => formik.setFieldTouched('dueDate', true)}
                 error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}

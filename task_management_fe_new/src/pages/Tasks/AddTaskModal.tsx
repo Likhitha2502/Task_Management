@@ -115,11 +115,12 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
 
         {/* Title */}
         <div style={{ marginBottom: '20px' }}>
-          <Typography style={labelStyle}>Task title</Typography>
+          <Typography id="add-title-label" style={labelStyle}>Task title</Typography>
           <TextField
             fullWidth size="small" placeholder="Enter task title"
             value={formik.values.title}
             sx={fieldSx}
+            slotProps={{ htmlInput: { 'aria-labelledby': 'add-title-label' } }}
             onChange={(e) => { formik.setFieldValue('title', e.target.value); if (error) boundActions.tasks.clearTasksErrors(); }}
             onBlur={formik.handleBlur('title')}
             error={formik.touched.title && Boolean(formik.errors.title)}
@@ -133,7 +134,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
 
         {/* Description */}
         <div style={{ marginBottom: '20px' }}>
-          <Typography style={labelStyle}>
+          <Typography id="add-description-label" style={labelStyle}>
             Description <span style={{ fontWeight: 400, color: '#bbb' }}>(optional)</span>
           </Typography>
           <TextField
@@ -141,6 +142,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
             placeholder="Add a description…"
             value={formik.values.description}
             sx={fieldSx}
+            slotProps={{ htmlInput: { 'aria-labelledby': 'add-description-label' } }}
             onChange={(e) => formik.setFieldValue('description', e.target.value)}
           />
         </div>
@@ -148,7 +150,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
         {/* Status + Priority */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
           <div>
-            <Typography style={labelStyle}>Status</Typography>
+            <Typography id="add-status-label" style={labelStyle}>Status</Typography>
             <Autocomplete
               options={STATUSES}
               value={formik.values.status || null}
@@ -159,11 +161,12 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
               }}
               onBlur={() => formik.setFieldTouched('status', true)}
               size="small"
-              renderInput={(params) => (
+              renderInput={({ inputProps: acInputProps, ...params }) => (
                 <TextField
                   {...params}
                   placeholder="Select status"
                   sx={fieldSx}
+                  slotProps={{ htmlInput: { ...acInputProps, 'aria-labelledby': 'add-status-label' } }}
                   error={formik.touched.status && Boolean(formik.errors.status)}
                 />
               )}
@@ -176,7 +179,7 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
           </div>
 
           <div>
-            <Typography style={labelStyle}>Priority</Typography>
+            <Typography id="add-priority-label" style={labelStyle}>Priority</Typography>
             <Autocomplete
               options={PRIORITIES}
               value={formik.values.priority || null}
@@ -187,11 +190,12 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
               }}
               onBlur={() => formik.setFieldTouched('priority', true)}
               size="small"
-              renderInput={(params) => (
+              renderInput={({ inputProps: acInputProps, ...params }) => (
                 <TextField
                   {...params}
                   placeholder="Select priority"
                   sx={fieldSx}
+                  slotProps={{ htmlInput: { ...acInputProps, 'aria-labelledby': 'add-priority-label' } }}
                   error={formik.touched.priority && Boolean(formik.errors.priority)}
                 />
               )}
@@ -206,12 +210,12 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
 
         {/* Due Date */}
         <div>
-          <Typography style={labelStyle}>Due Date</Typography>
+          <Typography id="add-due-date-label" style={labelStyle}>Due Date</Typography>
           <TextField
             fullWidth size="small" type="date"
             value={formik.values.dueDate}
             sx={fieldSx}
-            slotProps={{ inputLabel: { shrink: true } }}
+            slotProps={{ inputLabel: { shrink: true }, htmlInput: { 'aria-labelledby': 'add-due-date-label' } }}
             onChange={(e) => {
               let value = e.target.value;
               if (value) {
