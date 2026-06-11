@@ -8,6 +8,7 @@ import com.focusflow.repository.FocusTimerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.focusflow.exception.BadRequestException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -31,12 +32,26 @@ public class FocusTimerController {
 
         log.info("Setting focus timer for user: {}", email);
 
+        Long durationMinutes = request.getDurationMinutes();
+
+        if (durationMinutes == null) {
+            throw new BadRequestException("Duration is required");
+        }
+
+        if (durationMinutes < 0) {
+            throw new BadRequestException("Duration cannot be negative");
+        }
+
+        if (durationMinutes > 0 && durationMinutes < 10) {
+            throw new BadRequestException("Focus timer duration must be at least 10 minutes");
+        }
+
         FocusTimer focusTimer = focusTimerRepository.findByUserEmail(email)
                 .orElse(new FocusTimer());
 
         focusTimer.setUserEmail(email);
 
-        if (request.getDurationMinutes() == 0) {
+        if (durationMinutes == 0) {
 
             focusTimer.setActive(false);
             focusTimer.setDurationMinutes(0L);
@@ -45,21 +60,21 @@ public class FocusTimerController {
         } else {
 
             focusTimer.setActive(true);
-            focusTimer.setDurationMinutes(request.getDurationMinutes());
+            focusTimer.setDurationMinutes(durationMinutes);
 
             focusTimer.setEndTime(
                     LocalDateTime.now()
-                            .plusMinutes(request.getDurationMinutes())
+                            .plusMinutes(durationMinutes)
             );
         }
-        focusTimerRepository.save(focusTimer);
-        FocusTimerUpdateResponse response = new FocusTimerUpdateResponse();
 
+        focusTimerRepository.save(focusTimer);
+
+        FocusTimerUpdateResponse response = new FocusTimerUpdateResponse();
         response.setMessage("Focus timer updated successfully");
 
         return response;
     }
-
     @GetMapping
     public FocusTimerResponse getFocusTimer(Authentication authentication) {
 
