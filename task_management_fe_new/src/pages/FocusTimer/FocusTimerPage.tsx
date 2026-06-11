@@ -22,13 +22,15 @@ const timerSchema = yup.object({
   hours: yup.number(),
   minutes: yup
     .string()
-    .test('max-59', 'Minutes must be between 0 and 59.', (val) => {
-      if (!val) return true;
+    .test('max-59', 'Minutes must be between 0 and 59.', function (val) {
+      const { hours } = this.parent as { hours: number };
+      if (hours === 12 || !val) return true;
       const n = parseInt(val, 10);
       return n >= 0 && n <= 59;
     })
     .test('min-total', 'Minimum focus timer duration is 10 minutes.', function (val) {
       const { hours } = this.parent as { hours: number };
+      if (hours === 12) return true;
       return (hours ?? 0) * 60 + parseMins(val ?? '') >= 10;
     }),
 });
@@ -122,7 +124,9 @@ export const FocusTimerPage = () => {
           </div>
         </div>
 
-        {formik.errors.minutes && <p className={classes.errorText}>{formik.errors.minutes as string}</p>}
+        {formik.errors.minutes && formik.values.hours !== 12 && (
+          <p className={classes.errorText}>{formik.errors.minutes as string}</p>
+        )}
         {error && !formik.errors.minutes && <p className={classes.errorText}>{error}</p>}
         {postStatus === 'success' && <p className={classes.successText}>Focus timer started!</p>}
 
