@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { Tooltip } from '@mui/material';
+
 import { boundActions, selectors } from '@/app/index';
 
 import { ROUTES } from '../constants/routes';
@@ -30,6 +32,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   useEffect(() => {
     boundActions.profile.fetchUserProfileRequest();
     boundActions.focusTimer.fetchFocusTimerRequest();
+    const interval = setInterval(() => boundActions.focusTimer.fetchFocusTimerRequest(), 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -99,16 +103,21 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <div className={classes.headerSpacer} />
 
           {/* Focus Timer status button */}
-          <button
-            className={cx(
-              classes.focusTimerHeaderBtn,
-              timerStatus?.active && classes.focusTimerHeaderBtnActive,
-            )}
-            onClick={() => navigate(ROUTES.focusTimer)}
-            title={timerStatus?.active ? `Timer active · ${timerStatus.remainingMinutes} min` : 'Focus Timer'}
+          <Tooltip
+            title={timerStatus?.active ? `Timer active · ${timerStatus.remainingMinutes} minutes remaining` : 'Focus Timer'}
+            onOpen={() => boundActions.focusTimer.fetchFocusTimerRequest()}
+            arrow
           >
-            Focus Timer
-          </button>
+            <button
+              className={cx(
+                classes.focusTimerHeaderBtn,
+                timerStatus?.active && classes.focusTimerHeaderBtnActive,
+              )}
+              onClick={() => navigate(ROUTES.focusTimer)}
+            >
+              Focus Timer
+            </button>
+          </Tooltip>
 
           {/* Profile dropdown */}
           <div className={classes.profileWrapper}>
