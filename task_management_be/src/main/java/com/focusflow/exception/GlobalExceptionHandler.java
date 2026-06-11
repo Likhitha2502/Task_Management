@@ -1,7 +1,9 @@
 package com.focusflow.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
@@ -29,12 +31,38 @@ public class GlobalExceptionHandler {
         return response;
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, Object> handleValidationException(MethodArgumentNotValidException ex) {
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("Invalid request");
+
+        log.warn("Validation error: {}", message);
+        response.put("message", message);
+        return response;
+    }
+
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleInvalidJson(Exception ex) {
         Map<String, Object> response = new LinkedHashMap<>();
         log.warn("Invalid request format: {}", ex.getMessage());
         response.put("message", "Invalid request format (check date format or JSON)");
+        return response;
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        log.warn("Database constraint violation: {}", ex.getMessage());
+        response.put("message", "Input value is too long or violates a database constraint");
         return response;
     }
 

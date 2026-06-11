@@ -1,6 +1,5 @@
 package com.focusflow.controller;
 
-import com.focusflow.controller.ProfileController;
 import com.focusflow.dto.ProfileResponse;
 import com.focusflow.dto.ResetPasswordRequest;
 import com.focusflow.service.AuthService;

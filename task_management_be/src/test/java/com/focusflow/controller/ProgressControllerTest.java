@@ -1,7 +1,6 @@
 package com.focusflow.controller;
 
 import com.focusflow.FocusFlowConstants;
-import com.focusflow.controller.ProgressController;
 import com.focusflow.dto.ProgressCountResponse;
 import com.focusflow.dto.ProgressPercentResponse;
 import com.focusflow.repository.TaskRepository;
