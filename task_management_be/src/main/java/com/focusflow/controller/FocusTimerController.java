@@ -35,38 +35,23 @@ public class FocusTimerController {
         Long durationMinutes = request.getDurationMinutes();
 
         if (durationMinutes == null) {
-            throw new BadRequestException("Duration is required");
+            throw new BadRequestException("Focus timer duration is required");
         }
 
-        if (durationMinutes < 0) {
-            throw new BadRequestException("Duration cannot be negative");
-        }
-
-        if (durationMinutes > 0 && durationMinutes < 10) {
-            throw new BadRequestException("Focus timer duration must be at least 10 minutes");
+        if (durationMinutes < 10 || durationMinutes > 720) {
+            throw new BadRequestException("Focus timer duration must be between 10 and 720 minutes");
         }
 
         FocusTimer focusTimer = focusTimerRepository.findByUserEmail(email)
                 .orElse(new FocusTimer());
 
         focusTimer.setUserEmail(email);
-
-        if (durationMinutes == 0) {
-
-            focusTimer.setActive(false);
-            focusTimer.setDurationMinutes(0L);
-            focusTimer.setEndTime(null);
-
-        } else {
-
-            focusTimer.setActive(true);
-            focusTimer.setDurationMinutes(durationMinutes);
-
-            focusTimer.setEndTime(
-                    LocalDateTime.now()
-                            .plusMinutes(durationMinutes)
-            );
-        }
+        focusTimer.setActive(true);
+        focusTimer.setDurationMinutes(durationMinutes);
+        focusTimer.setEndTime(
+                LocalDateTime.now()
+                        .plusMinutes(durationMinutes)
+        );
 
         focusTimerRepository.save(focusTimer);
 
@@ -75,6 +60,7 @@ public class FocusTimerController {
 
         return response;
     }
+
     @GetMapping
     public FocusTimerResponse getFocusTimer(Authentication authentication) {
 

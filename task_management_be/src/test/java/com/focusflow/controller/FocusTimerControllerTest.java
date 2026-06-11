@@ -1,6 +1,5 @@
 package com.focusflow.controller;
 
-import com.focusflow.controller.FocusTimerController;
 import com.focusflow.dto.FocusTimerRequest;
 import com.focusflow.dto.FocusTimerResponse;
 import com.focusflow.dto.FocusTimerUpdateResponse;
@@ -28,7 +27,7 @@ class FocusTimerControllerTest {
     }
 
     @Test
-    void setFocusTimer_shouldCreateActiveTimerWhenDurationIsGreaterThanZero() {
+    void setFocusTimer_shouldCreateActiveTimerWhenDurationIsValid() {
         FocusTimerRequest request = new FocusTimerRequest();
         request.setDurationMinutes(25L);
 
@@ -51,28 +50,115 @@ class FocusTimerControllerTest {
     }
 
     @Test
-    void setFocusTimer_shouldDisableTimerWhenDurationIsZero() {
-        FocusTimer existingTimer = new FocusTimer();
-        existingTimer.setUserEmail("test@gmail.com");
-        existingTimer.setActive(true);
-        existingTimer.setDurationMinutes(25L);
-        existingTimer.setEndTime(LocalDateTime.now().plusMinutes(25));
-
+    void setFocusTimer_shouldAllowMinimumDurationOfTenMinutes() {
         FocusTimerRequest request = new FocusTimerRequest();
-        request.setDurationMinutes(0L);
+        request.setDurationMinutes(10L);
 
         when(focusTimerRepository.findByUserEmail("test@gmail.com"))
-                .thenReturn(Optional.of(existingTimer));
+                .thenReturn(Optional.empty());
 
         FocusTimerUpdateResponse response =
                 focusTimerController.setFocusTimer(authentication(), request);
 
-        assertFalse(existingTimer.isActive());
-        assertEquals(0L, existingTimer.getDurationMinutes());
-        assertNull(existingTimer.getEndTime());
-        assertEquals("Focus timer updated successfully", response.getMessage());
+        ArgumentCaptor<FocusTimer> captor = ArgumentCaptor.forClass(FocusTimer.class);
+        verify(focusTimerRepository).save(captor.capture());
 
-        verify(focusTimerRepository).save(existingTimer);
+        FocusTimer savedTimer = captor.getValue();
+
+        assertTrue(savedTimer.isActive());
+        assertEquals(10L, savedTimer.getDurationMinutes());
+        assertEquals("Focus timer updated successfully", response.getMessage());
+    }
+
+    @Test
+    void setFocusTimer_shouldAllowMaximumDurationOfSevenTwentyMinutes() {
+        FocusTimerRequest request = new FocusTimerRequest();
+        request.setDurationMinutes(720L);
+
+        when(focusTimerRepository.findByUserEmail("test@gmail.com"))
+                .thenReturn(Optional.empty());
+
+        FocusTimerUpdateResponse response =
+                focusTimerController.setFocusTimer(authentication(), request);
+
+        ArgumentCaptor<FocusTimer> captor = ArgumentCaptor.forClass(FocusTimer.class);
+        verify(focusTimerRepository).save(captor.capture());
+
+        FocusTimer savedTimer = captor.getValue();
+
+        assertTrue(savedTimer.isActive());
+        assertEquals(720L, savedTimer.getDurationMinutes());
+        assertEquals("Focus timer updated successfully", response.getMessage());
+    }
+
+    @Test
+    void setFocusTimer_shouldRejectNullDuration() {
+        FocusTimerRequest request = new FocusTimerRequest();
+        request.setDurationMinutes(null);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> focusTimerController.setFocusTimer(authentication(), request)
+        );
+
+        assertEquals("Focus timer duration is required", exception.getMessage());
+        verify(focusTimerRepository, never()).save(any(FocusTimer.class));
+    }
+
+    @Test
+    void setFocusTimer_shouldRejectZeroDuration() {
+        FocusTimerRequest request = new FocusTimerRequest();
+        request.setDurationMinutes(0L);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> focusTimerController.setFocusTimer(authentication(), request)
+        );
+
+        assertEquals("Focus timer duration must be between 10 and 720 minutes", exception.getMessage());
+        verify(focusTimerRepository, never()).save(any(FocusTimer.class));
+    }
+
+    @Test
+    void setFocusTimer_shouldRejectDurationLessThanTenMinutes() {
+        FocusTimerRequest request = new FocusTimerRequest();
+        request.setDurationMinutes(5L);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> focusTimerController.setFocusTimer(authentication(), request)
+        );
+
+        assertEquals("Focus timer duration must be between 10 and 720 minutes", exception.getMessage());
+        verify(focusTimerRepository, never()).save(any(FocusTimer.class));
+    }
+
+    @Test
+    void setFocusTimer_shouldRejectNegativeDuration() {
+        FocusTimerRequest request = new FocusTimerRequest();
+        request.setDurationMinutes(-1L);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> focusTimerController.setFocusTimer(authentication(), request)
+        );
+
+        assertEquals("Focus timer duration must be between 10 and 720 minutes", exception.getMessage());
+        verify(focusTimerRepository, never()).save(any(FocusTimer.class));
+    }
+
+    @Test
+    void setFocusTimer_shouldRejectDurationGreaterThanSevenTwentyMinutes() {
+        FocusTimerRequest request = new FocusTimerRequest();
+        request.setDurationMinutes(721L);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> focusTimerController.setFocusTimer(authentication(), request)
+        );
+
+        assertEquals("Focus timer duration must be between 10 and 720 minutes", exception.getMessage());
+        verify(focusTimerRepository, never()).save(any(FocusTimer.class));
     }
 
     @Test
@@ -124,20 +210,5 @@ class FocusTimerControllerTest {
 
         assertTrue(response.isActive());
         assertTrue(response.getRemainingMinutes() > 0);
-    }
-
-    @Test
-    void setFocusTimer_shouldRejectDurationLessThanTenMinutes() {
-        FocusTimerRequest request = new FocusTimerRequest();
-        request.setDurationMinutes(5L);
-
-        BadRequestException exception = assertThrows(
-                BadRequestException.class,
-                () -> focusTimerController.setFocusTimer(authentication(), request)
-        );
-
-        assertEquals("Focus timer duration must be at least 10 minutes", exception.getMessage());
-
-        verify(focusTimerRepository, never()).save(any(FocusTimer.class));
     }
 }
