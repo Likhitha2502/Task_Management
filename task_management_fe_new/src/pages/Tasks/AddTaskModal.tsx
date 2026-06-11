@@ -1,18 +1,39 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
-Alert, Button, CircularProgress,   Dialog, DialogActions,
-DialogContent, DialogTitle,   FormControl, MenuItem, Select,
-styled,
-  TextField, Typography, } from '@mui/material';
+  Alert, Autocomplete, Button, CircularProgress, Dialog, DialogActions,
+  DialogContent, DialogTitle, FormHelperText, styled, TextField, Typography,
+} from '@mui/material';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 
 import { CORAL } from '@/models/color';
 
 import { boundActions, selectors } from '../../app/index';
-import { PRIORITIES,STATUSES } from '../../models/task';
+import { type CreateTaskPayload, PRIORITIES, STATUSES, type TasksPriority, type TaskStatus } from '../../models/task';
 
-import type { CreateTaskPayload} from '../../models/task';
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+const addTaskSchema = yup.object({
+  title:       yup.string().trim().required('Title is required').max(255, 'Title must be 255 characters or less'),
+  description: yup.string().nullable().max(255, 'Description must be 255 characters or less'),
+  status:      yup.string().oneOf(STATUSES as string[], 'Status is required').required('Status is required'),
+  priority:    yup.string().oneOf(PRIORITIES as string[], 'Priority is required').required('Priority is required'),
+  dueDate:     yup.string().required('Due date is required'),
+});
+
+type FormValues = {
+  title:       string;
+  description: string;
+  status:      TaskStatus | '';
+  priority:    TasksPriority | '';
+  dueDate:     string;
+};
+
+const EMPTY_FORM: FormValues = {
+  title: '', description: '', status: 'TODO', priority: 'MEDIUM', dueDate: '',
+};
 
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
@@ -31,8 +52,8 @@ const fieldSx = {
     borderRadius: '8px',
     fontFamily: 'Georgia, serif',
     fontSize: '14px',
-    '&:hover fieldset':  { borderColor: CORAL },
-    '&.Mui-focused fieldset': { borderColor: CORAL },
+    '&:hover fieldset':        { borderColor: CORAL },
+    '&.Mui-focused fieldset':  { borderColor: CORAL },
   },
 };
 
@@ -47,32 +68,34 @@ type Props = { open: boolean; onClose: () => void };
 
 export const AddTaskModal = ({ open, onClose }: Props) => {
   const { create: loading } = useSelector(selectors.tasks.isLoading);
-
   const error = useSelector(selectors.tasks.getError);
-  const [form, setForm] = useState<CreateTaskPayload>({
-    title:       '',
-    description: null,
-    status:      'TODO',
-    priority:    'MEDIUM',
-    dueDate:     '',
+
+  const formik = useFormik<FormValues>({
+    initialValues: EMPTY_FORM,
+    validationSchema: addTaskSchema,
+    validateOnChange: false,
+    validateOnBlur: true,
+    onSubmit: (values) => {
+      const payload: CreateTaskPayload = {
+        title:       values.title.trim(),
+        description: values.description || null,
+        status:      values.status as TaskStatus,
+        priority:    values.priority as TasksPriority,
+        dueDate:     values.dueDate,
+      };
+      boundActions.tasks.createTaskRequest(payload);
+      handleClose();
+    },
   });
 
-  const handleChange = useCallback((field: keyof CreateTaskPayload, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (error) boundActions.tasks.clearTasksErrors();
-  }, [error]);
-
   const handleClose = useCallback(() => {
-    setForm({ title: '', description: null, status: 'TODO', priority: 'MEDIUM', dueDate: '' });
+    formik.resetForm();
+    boundActions.tasks.clearTasksErrors();
     onClose();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
 
-  const handleSave = useCallback(() => {
-    if (!form.title.trim()) return;
-    boundActions.tasks.createTaskRequest(form);
-    handleClose();
-  }, [form]);
-
+  const saveDisabled = loading;
 
   return (
     <StyledDialog open={open} onClose={handleClose}>
@@ -89,65 +112,104 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
           </Alert>
         )}
 
-        {/* Task title */}
+        {/* Title */}
         <div style={{ marginBottom: '20px' }}>
           <Typography style={labelStyle}>Task title</Typography>
           <TextField
             fullWidth size="small" placeholder="Enter task title"
-            value={form.title} sx={fieldSx}
-            onChange={(e) => handleChange('title', e.target.value)}
+            value={formik.values.title}
+            sx={fieldSx}
+            onChange={(e) => { formik.setFieldValue('title', e.target.value); if (error) boundActions.tasks.clearTasksErrors(); }}
+            onBlur={formik.handleBlur('title')}
+            error={formik.touched.title && Boolean(formik.errors.title)}
           />
+          {formik.touched.title && formik.errors.title && (
+            <FormHelperText error sx={{ fontFamily: 'Georgia, serif', ml: 0.5 }}>
+              {formik.errors.title}
+            </FormHelperText>
+          )}
         </div>
 
         {/* Description */}
         <div style={{ marginBottom: '20px' }}>
-          <Typography style={labelStyle}>Description <span style={{ fontWeight: 400, color: '#bbb' }}>(optional)</span></Typography>
+          <Typography style={labelStyle}>
+            Description <span style={{ fontWeight: 400, color: '#bbb' }}>(optional)</span>
+          </Typography>
           <TextField
             fullWidth multiline minRows={2} maxRows={4}
             placeholder="Add a description…"
-            value={form.description ?? ''} sx={fieldSx}
-            onChange={(e) => handleChange('description', e.target.value || null as any)}
+            value={formik.values.description}
+            sx={fieldSx}
+            onChange={(e) => formik.setFieldValue('description', e.target.value)}
           />
         </div>
 
-        {/* Status + Priority row */}
+        {/* Status + Priority */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
           <div>
             <Typography style={labelStyle}>Status</Typography>
-            <FormControl fullWidth size="small">
-              <Select
-                value={form.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-                sx={{ borderRadius: '8px', fontFamily: 'Georgia, serif', fontSize: '14px' }}
-              >
-                {STATUSES.map((s) => (
-                  <MenuItem key={s} value={s} style={{ fontFamily: 'Georgia, serif', fontSize: '14px' }}>{s}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={STATUSES}
+              value={formik.values.status || null}
+              onChange={(_, val) => {
+                formik.setFieldValue('status', val ?? '');
+                formik.setFieldTouched('status', true);
+                if (error) boundActions.tasks.clearTasksErrors();
+              }}
+              onBlur={() => formik.setFieldTouched('status', true)}
+              size="small"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Select status"
+                  sx={fieldSx}
+                  error={formik.touched.status && Boolean(formik.errors.status)}
+                />
+              )}
+            />
+            {formik.touched.status && formik.errors.status && (
+              <FormHelperText error sx={{ fontFamily: 'Georgia, serif', ml: 0.5 }}>
+                {formik.errors.status}
+              </FormHelperText>
+            )}
           </div>
+
           <div>
             <Typography style={labelStyle}>Priority</Typography>
-            <FormControl fullWidth size="small">
-              <Select
-                value={form.priority}
-                onChange={(e) => handleChange('priority', e.target.value)}
-                sx={{ borderRadius: '8px', fontFamily: 'Georgia, serif', fontSize: '14px' }}
-              >
-                {PRIORITIES.map((p) => (
-                  <MenuItem key={p} value={p} style={{ fontFamily: 'Georgia, serif', fontSize: '14px' }}>{p}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={PRIORITIES}
+              value={formik.values.priority || null}
+              onChange={(_, val) => {
+                formik.setFieldValue('priority', val ?? '');
+                formik.setFieldTouched('priority', true);
+                if (error) boundActions.tasks.clearTasksErrors();
+              }}
+              onBlur={() => formik.setFieldTouched('priority', true)}
+              size="small"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Select priority"
+                  sx={fieldSx}
+                  error={formik.touched.priority && Boolean(formik.errors.priority)}
+                />
+              )}
+            />
+            {formik.touched.priority && formik.errors.priority && (
+              <FormHelperText error sx={{ fontFamily: 'Georgia, serif', ml: 0.5 }}>
+                {formik.errors.priority}
+              </FormHelperText>
+            )}
           </div>
         </div>
 
-        {/* Due date */}
+        {/* Due Date */}
         <div>
           <Typography style={labelStyle}>Due Date</Typography>
           <TextField
             fullWidth size="small" type="date"
-            value={form.dueDate} sx={fieldSx}
+            value={formik.values.dueDate}
+            sx={fieldSx}
             slotProps={{ inputLabel: { shrink: true } }}
             onChange={(e) => {
               let value = e.target.value;
@@ -155,9 +217,18 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
                 const [year, ...rest] = value.split('-');
                 if (year.length > 4) value = [year.slice(0, 4), ...rest].join('-');
               }
-              handleChange('dueDate', value);
+              formik.setFieldValue('dueDate', value);
+              formik.setFieldTouched('dueDate', true);
+              if (error) boundActions.tasks.clearTasksErrors();
             }}
+            onBlur={() => formik.setFieldTouched('dueDate', true)}
+            error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
           />
+          {formik.touched.dueDate && formik.errors.dueDate && (
+            <FormHelperText error sx={{ fontFamily: 'Georgia, serif', ml: 0.5 }}>
+              {formik.errors.dueDate}
+            </FormHelperText>
+          )}
         </div>
       </DialogContent>
 
@@ -170,8 +241,9 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
           Cancel
         </Button>
         <Button
-          fullWidth variant="contained" onClick={handleSave}
-          disabled={loading || !form.title.trim()}
+          fullWidth variant="contained"
+          onClick={() => formik.submitForm()}
+          disabled={saveDisabled}
           style={{ fontFamily: 'Georgia, serif', backgroundColor: CORAL,
             textTransform: 'none', fontSize: '14px', borderRadius: '8px', fontWeight: 600 }}
         >
