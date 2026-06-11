@@ -9,16 +9,32 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 
 import { boundActions, selectors } from '@/app/index';
 
 import { useFocusTimerStyles } from './FocusTimerPage.styles';
 
+const parseMins = (s: string) => (s === '' ? 0 : parseInt(s, 10));
+
+const timerSchema = yup.object({
+  hours: yup.number(),
+  minutes: yup
+    .string()
+    .test('max-59', 'Minutes must be between 0 and 59.', (val) => {
+      if (!val) return true;
+      const n = parseInt(val, 10);
+      return n >= 0 && n <= 59;
+    })
+    .test('min-total', 'Minimum focus timer duration is 10 minutes.', function (val) {
+      const { hours } = this.parent as { hours: number };
+      return (hours ?? 0) * 60 + parseMins(val ?? '') >= 10;
+    }),
+});
+
 export const FocusTimerPage = () => {
   const { classes } = useFocusTimerStyles();
-  const [hours, setHours] = useState(0);
-  const [minutes, setMinutes] = useState(30);
-  const [minutesError, setMinutesError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const postStatus  = useSelector(selectors.focusTimer.postStatus);
@@ -34,48 +50,39 @@ export const FocusTimerPage = () => {
     }
   }, [postStatus]);
 
-  const validate = (): boolean => {
-    if (hours === 0 && minutes <= 0) {
-      setMinutesError('Please enter at least 1 minute when hours is set to 0.');
-      return false;
-    }
-    if (minutes > 60) {
-      setMinutesError('Minutes must be between 0 and 60.');
-      return false;
-    }
-    setMinutesError('');
-    return true;
-  };
-
-  const dispatchStart = () => {
-    boundActions.focusTimer.startFocusTimerRequest({ durationMinutes: hours * 60 + minutes });
-  };
-
-  const handleSubmit = () => {
-    if (!validate()) return;
-    if (timerStatus?.active) {
-      setConfirmOpen(true);
-      return;
-    }
-    dispatchStart();
-  };
+  const formik = useFormik({
+    initialValues: { hours: 0, minutes: '10' },
+    validationSchema: timerSchema,
+    validateOnMount: true,
+    onSubmit: (values) => {
+      if (timerStatus?.active) {
+        setConfirmOpen(true);
+        return;
+      }
+      boundActions.focusTimer.startFocusTimerRequest({
+        durationMinutes: values.hours * 60 + parseMins(values.minutes),
+      });
+    },
+  });
 
   const handleConfirm = () => {
     setConfirmOpen(false);
-    dispatchStart();
+    boundActions.focusTimer.startFocusTimerRequest({
+      durationMinutes: formik.values.hours * 60 + parseMins(formik.values.minutes),
+    });
   };
 
   const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    setMinutes(isNaN(val) ? 0 : Math.min(60, Math.max(0, val)));
-    if (minutesError) setMinutesError('');
+    const raw = e.target.value;
+    if (!/^\d{0,2}$/.test(raw)) return;
+    formik.setFieldValue('minutes', raw);
   };
 
   return (
     <div className={classes.root}>
       <div className={classes.section}>
         <h2 className={classes.sectionTitle}>Focus Timer Settings</h2>
-        <p className={classes.helperText}>A focus timer session cannot exceed 12 hours.</p>
+        <p className={classes.helperText}>Minimum session length is 10 minutes. Sessions cannot exceed 12 hours.</p>
 
         <div className={classes.formRow}>
           <span className={classes.timerLabel}>Timer:</span>
@@ -85,12 +92,11 @@ export const FocusTimerPage = () => {
             <span className={classes.unitLabel}>Hours</span>
             <select
               className={classes.select}
-              value={hours}
+              value={formik.values.hours}
               onChange={(e) => {
                 const h = Number(e.target.value);
-                setHours(h);
-                if (h === 12) setMinutes(0);
-                setMinutesError('');
+                formik.setFieldValue('hours', h);
+                if (h === 12) formik.setFieldValue('minutes', '');
               }}
               aria-label="Hours"
             >
@@ -104,26 +110,26 @@ export const FocusTimerPage = () => {
           <div className={classes.inputGroup}>
             <span className={classes.unitLabel}>Minutes</span>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               className={classes.numberInput}
-              value={minutes}
-              min={0}
-              max={60}
+              placeholder="00"
+              value={formik.values.minutes}
               onChange={handleMinutesChange}
-              disabled={hours === 12}
+              disabled={formik.values.hours === 12}
               aria-label="Minutes"
             />
           </div>
         </div>
 
-        {minutesError && <p className={classes.errorText}>{minutesError}</p>}
-        {error && !minutesError && <p className={classes.errorText}>{error}</p>}
+        {formik.errors.minutes && <p className={classes.errorText}>{formik.errors.minutes as string}</p>}
+        {error && !formik.errors.minutes && <p className={classes.errorText}>{error}</p>}
         {postStatus === 'success' && <p className={classes.successText}>Focus timer started!</p>}
 
         <button
           className={classes.submitBtn}
-          onClick={handleSubmit}
-          disabled={isLoading.post}
+          onClick={() => formik.submitForm()}
+          disabled={isLoading.post || !formik.isValid}
         >
           {isLoading.post ? 'Starting...' : 'Start Timer'}
         </button>

@@ -149,7 +149,14 @@ export const AddTaskModal = ({ open, onClose }: Props) => {
             fullWidth size="small" type="date"
             value={form.dueDate} sx={fieldSx}
             slotProps={{ inputLabel: { shrink: true } }}
-            onChange={(e) => handleChange('dueDate', e.target.value)}
+            onChange={(e) => {
+              let value = e.target.value;
+              if (value) {
+                const [year, ...rest] = value.split('-');
+                if (year.length > 4) value = [year.slice(0, 4), ...rest].join('-');
+              }
+              handleChange('dueDate', value);
+            }}
           />
         </div>
       </DialogContent>
