@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -38,7 +38,7 @@ const timerSchema = yup.object({
 export const FocusTimerPage = () => {
   const { classes } = useFocusTimerStyles();
   const [confirmOpen, setConfirmOpen] = useState(false);
-
+  const submittingRef = useRef(false);
   const postStatus  = useSelector(selectors.focusTimer.postStatus);
   const isLoading   = useSelector(selectors.focusTimer.isLoading);
   const error       = useSelector(selectors.focusTimer.error);
@@ -58,6 +58,7 @@ export const FocusTimerPage = () => {
     validateOnMount: true,
     onSubmit: (values) => {
       if (timerStatus?.active) {
+        submittingRef.current = false;
         setConfirmOpen(true);
         return;
       }
@@ -68,6 +69,8 @@ export const FocusTimerPage = () => {
   });
 
   const handleConfirm = () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setConfirmOpen(false);
     boundActions.focusTimer.startFocusTimerRequest({
       durationMinutes: formik.values.hours * 60 + parseMins(formik.values.minutes),
@@ -160,7 +163,7 @@ export const FocusTimerPage = () => {
 
         <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
           <Button
-            onClick={() => setConfirmOpen(false)}
+            onClick={() => { submittingRef.current = false; setConfirmOpen(false); }}
             variant="outlined"
             color="inherit"
             sx={{ fontFamily: 'Georgia, serif', textTransform: 'none', borderColor: '#ddd', color: '#555' }}
