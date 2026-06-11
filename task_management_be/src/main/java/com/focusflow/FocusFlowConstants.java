@@ -45,4 +45,10 @@ public final class FocusFlowConstants {
                 .replace("_", " ")
                 .toUpperCase();
     }
+
+    public static final String PASSWORD_REGEX =
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,16}$";
+
+    public static final String PASSWORD_VALIDATION_MESSAGE =
+            "Password must be 8-16 characters and include at least one uppercase letter, one lowercase letter, one number, and one special character";
 }

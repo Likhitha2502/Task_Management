@@ -1,7 +1,9 @@
 package com.focusflow.dto;
 
+import com.focusflow.FocusFlowConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
@@ -16,12 +18,15 @@ public class RegisterRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Enter a valid email address")
-    @Size(max = 255, message = "Email must be 255 characters or less")
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(max = 255, message = "Password must be 255 characters or less")
+    @Pattern(
+            regexp = FocusFlowConstants.PASSWORD_REGEX,
+            message = FocusFlowConstants.PASSWORD_VALIDATION_MESSAGE
+    )
     private String password;
+
 
     public String getFirstName() {
         return firstName;
