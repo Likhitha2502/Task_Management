@@ -28,13 +28,16 @@ export const useChangePasswordModalStyles = makeStyles({ name: 'ChangePasswordMo
       color: '#1a1a1a',
     },
     subtitleText: {
+      display: 'block',
       fontFamily: 'Georgia, serif',
       color: '#999',
       fontSize: '13px',
       marginTop: '4px',
+      marginBottom: theme.spacing(3),
     },
     dialogContent: {
-      paddingTop: theme.spacing(2),
+      overflow: 'visible',
+      paddingTop: theme.spacing(3),
       paddingLeft: theme.spacing(3),
       paddingRight: theme.spacing(3),
     },

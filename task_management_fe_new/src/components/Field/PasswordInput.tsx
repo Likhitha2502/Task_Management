@@ -16,6 +16,7 @@ type PasswordInputProps = {
 
 export const PasswordInput = ({
   name,
+  label,
   placeholder,
   className,
   value,
@@ -30,6 +31,7 @@ export const PasswordInput = ({
       name={name}
       value={value}
       onChange={onChange}
+      label={label}
       fullWidth
       size="small"
       type={visible ? 'text' : 'password'}
@@ -37,14 +39,16 @@ export const PasswordInput = ({
       className={className}
       error={error}
       helperText={helperText}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <IconButton onClick={() => setVisible((v) => !v)} edge="end" size="small">
-              {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-            </IconButton>
-          </InputAdornment>
-        ),
+      slotProps={{
+        input: {
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={() => setVisible((v) => !v)} edge="end" size="small">
+                {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        },
       }}
     />
   );

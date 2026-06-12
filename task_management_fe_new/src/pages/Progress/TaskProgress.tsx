@@ -53,7 +53,7 @@ const STATUS_LABEL: Record<string, string> = {
   toDoTasks:        'To Do',       toDoPercent:       'To Do',
   inProgressTasks:  'In Progress', inProgressPercent: 'In Progress',
   inReviewTasks:    'Review',   inReviewPercent:   'Review',
-  completedTasks:   'Completed',   completedPercent:  'Completed',
+  completedTasks:   'Done',   completedPercent:  'Done',
 };
 
 const KEY_TO_STATUS: Record<string, TaskStatus> = {
