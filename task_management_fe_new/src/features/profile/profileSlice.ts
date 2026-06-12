@@ -141,7 +141,12 @@ const fetchUserProfilePictureEpic: Epic = (action$) =>
           )
         ),
         map((base64String) => profileSliceActions.fetchUserProfilePictureSuccess(base64String)),
-        catchError((error) => of(profileSliceActions.fetchUserProfilePictureFailure(error.message)))
+        catchError((error) => {
+          if (error?.response?.status === 404) {
+            return of(profileSliceActions.fetchUserProfilePictureSuccess(undefined));
+          }
+          return of(profileSliceActions.fetchUserProfilePictureFailure(error.message));
+        })
       )
     )
   );
@@ -167,7 +172,11 @@ const updateUserProfileEpic: Epic = (action$) =>
           headers: { 'Content-Type': 'multipart/form-data' }, // ← override JSON default
         })
       ).pipe(
-        mergeMap((response) => of (profileSliceActions.updateUserProfileSuccess(response.data), profileSliceActions.fetchUserProfileRequest())),
+        mergeMap((response) => of(
+          profileSliceActions.updateUserProfileSuccess(response.data),
+          profileSliceActions.fetchUserProfileRequest(),
+          profileSliceActions.fetchUserProfilePictureRequest(),
+        )),
         catchError((error) => {
           const message = getResponseError(error) || 'Failed to update user profile.';
           return of(profileSliceActions.updateUserProfileFailure(String(message)));

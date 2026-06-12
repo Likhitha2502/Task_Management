@@ -136,6 +136,16 @@ describe('profileSlice — reducer', () => {
       expect(state.loading.image).toBe(false);
       expect(state.imageIcon).toBe(base64);
     });
+
+    it('clears imageIcon and loading when called with undefined (no picture stored)', () => {
+      const state = reducer(
+        { ...initialState, imageIcon: 'old-base64', loading: { ...initialState.loading, image: true } },
+        profileSliceActions.fetchUserProfilePictureSuccess(undefined)
+      );
+      expect(state.loading.image).toBe(false);
+      expect(state.imageIcon).toBeUndefined();
+      expect(state.error).toBeNull();
+    });
   });
 
   describe('fetchUserProfilePictureFailure', () => {
@@ -229,6 +239,11 @@ describe('profileSliceSelectors', () => {
         selectors.userIcon(makeRootState({ imageIcon: base64 }) as any)
       ).toBe(base64);
     });
+    it('returns undefined when imageIcon is undefined (no picture stored after 404)', () => {
+      expect(
+        selectors.userIcon(makeRootState({ imageIcon: undefined }) as any)
+      ).toBeUndefined();
+    });
   });
 
   describe('getStatus', () => {
@@ -313,13 +328,52 @@ describe('fetchUserProfileEpic', () => {
   });
 });
 
+describe('fetchUserProfilePictureEpic', () => {
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('dispatches fetchUserProfilePictureSuccess with base64 string on success', async () => {
+    const blob = new Blob(['fake-image'], { type: 'image/jpeg' });
+    mockedHttp.get.mockResolvedValueOnce({ data: blob });
+
+    const actions = await runEpic(
+      profileEpics,
+      profileSliceActions.fetchUserProfilePictureRequest()
+    );
+
+    expect(actions[0].type).toBe(profileSliceActions.fetchUserProfilePictureSuccess.type);
+    expect(typeof actions[0].payload).toBe('string');
+  });
+
+  it('dispatches fetchUserProfilePictureSuccess with undefined on 404 (no picture stored)', async () => {
+    mockedHttp.get.mockRejectedValueOnce({ response: { status: 404 } });
+
+    const actions = await runEpic(
+      profileEpics,
+      profileSliceActions.fetchUserProfilePictureRequest()
+    );
+
+    expect(actions).toEqual([profileSliceActions.fetchUserProfilePictureSuccess(undefined)]);
+  });
+
+  it('dispatches fetchUserProfilePictureFailure on non-404 API error', async () => {
+    mockedHttp.get.mockRejectedValueOnce({ message: 'Network Error', response: { status: 500 } });
+
+    const actions = await runEpic(
+      profileEpics,
+      profileSliceActions.fetchUserProfilePictureRequest()
+    );
+
+    expect(actions).toEqual([profileSliceActions.fetchUserProfilePictureFailure('Network Error')]);
+  });
+});
+
 describe('updateUserProfileEpic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedProfileFile.get.mockReturnValue(undefined);
   });
 
-  it('dispatches updateUserProfileSuccess and fetchUserProfileRequest on success', async () => {
+  it('dispatches updateUserProfileSuccess, fetchUserProfileRequest, and fetchUserProfilePictureRequest on success', async () => {
     mockedHttp.put.mockResolvedValueOnce({ data: mockUser });
     mockedProfileFile.get.mockReturnValue(undefined);
 
@@ -331,6 +385,21 @@ describe('updateUserProfileEpic', () => {
     expect(mockedHttp.put).toHaveBeenCalled();
     expect(actions[0]).toEqual(profileSliceActions.updateUserProfileSuccess(mockUser));
     expect(actions[1]).toEqual(profileSliceActions.fetchUserProfileRequest());
+    expect(actions[2]).toEqual(profileSliceActions.fetchUserProfilePictureRequest());
+  });
+
+  it('appends firstName and lastName to FormData', async () => {
+    mockedProfileFile.get.mockReturnValue(undefined);
+    mockedHttp.put.mockResolvedValueOnce({ data: mockUser });
+
+    await runEpic(
+      profileEpics,
+      profileSliceActions.updateUserProfileRequest({ values: mockProfilePayload })
+    );
+
+    const formDataArg = mockedHttp.put.mock.calls[0][1] as FormData;
+    expect(formDataArg.get('firstName')).toBe(mockProfilePayload.firstName);
+    expect(formDataArg.get('lastName')).toBe(mockProfilePayload.lastName);
   });
 
   it('sends removeProfilePicture=false and no profilePicture when file is undefined (keep existing)', async () => {

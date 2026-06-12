@@ -25,6 +25,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const currentUser  = useSelector(selectors.profile.userProfile);
+  const profileIcon  = useSelector(selectors.profile.userIcon);
   const timerStatus  = useSelector(selectors.focusTimer.timerStatus);
   const initials = currentUser?.firstName && currentUser?.lastName
     ? `${currentUser.firstName[0]}${currentUser.lastName[0]}`.toUpperCase()
@@ -32,6 +33,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   useEffect(() => {
     boundActions.profile.fetchUserProfileRequest();
+    boundActions.profile.fetchUserProfilePictureRequest();
     boundActions.focusTimer.fetchFocusTimerRequest();
     const interval = setInterval(() => boundActions.focusTimer.fetchFocusTimerRequest(), 60_000);
     return () => clearInterval(interval);
@@ -125,7 +127,11 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               className={classes.profileBtn}
               onClick={() => setProfileOpen((o) => !o)}
             >
-              <div className={classes.profileAvatar}>{initials}</div>
+              <div className={classes.profileAvatar}>
+                {profileIcon
+                  ? <img src={profileIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                  : initials}
+              </div>
               <span className={classes.profileName}>{currentUser?.firstName ?? 'Account'}</span>
               <span style={{ fontSize: '10px', color: '#999', marginLeft: '2px' }}>▾</span>
             </button>
@@ -133,7 +139,11 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             {profileOpen && (
               <div className={classes.profileDropdown}>
                 <div className={classes.dropdownHeader}>
-                  <div className={classes.dropdownAvatar}>{initials}</div>
+                  <div className={classes.dropdownAvatar}>
+                    {profileIcon
+                      ? <img src={profileIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                      : initials}
+                  </div>
                   <div>
                     <p className={classes.dropdownName}>{currentUser?.firstName ?? '—'}</p>
                     <p className={classes.dropdownEmail}>{currentUser?.email ?? '—'}</p>
