@@ -53,15 +53,15 @@ class ProfileControllerTest {
         expectedResponse.put("email", "test@gmail.com");
         expectedResponse.put("profilePictureUrl", "/profile/picture");
 
-        when(authService.updateProfile("test@gmail.com", "New", "Name", file))
+        when(authService.updateProfile("test@gmail.com", "New", "Name", file, false))
                 .thenReturn(expectedResponse);
 
         Map<String, Object> response =
-                profileController.updateProfile(authentication(), "New", "Name", file);
+                profileController.updateProfile(authentication(), "New", "Name", file, false);
 
         assertEquals("Profile updated successfully", response.get("message"));
         assertEquals("test@gmail.com", response.get("email"));
-        verify(authService).updateProfile("test@gmail.com", "New", "Name", file);
+        verify(authService).updateProfile("test@gmail.com", "New", "Name", file, false);
     }
 
     @Test
@@ -101,5 +101,25 @@ class ProfileControllerTest {
         assertEquals("Password changed successfully. Please log in again.", response.get("message"));
         assertEquals(true, response.get("forceLogout"));
         verify(authService).changePassword("test@gmail.com", request);
+    }
+
+    @Test
+    void updateProfile_shouldRemoveProfilePictureWhenFlagIsTrue() {
+        Map<String, Object> expectedResponse = new LinkedHashMap<>();
+        expectedResponse.put("message", "Profile updated successfully");
+        expectedResponse.put("email", "test@gmail.com");
+        expectedResponse.put("profilePictureUrl", null);
+
+        when(authService.updateProfile("test@gmail.com", "New", "Name", null, true))
+                .thenReturn(expectedResponse);
+
+        Map<String, Object> response =
+                profileController.updateProfile(authentication(), "New", "Name", null, true);
+
+        assertEquals("Profile updated successfully", response.get("message"));
+        assertEquals("test@gmail.com", response.get("email"));
+        assertNull(response.get("profilePictureUrl"));
+
+        verify(authService).updateProfile("test@gmail.com", "New", "Name", null, true);
     }
 }

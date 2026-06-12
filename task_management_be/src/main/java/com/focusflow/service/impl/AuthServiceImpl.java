@@ -78,7 +78,9 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("Invalid credentials");
         }
+
         String token = jwtUtil.generateToken(user.getEmail());
+
         log.info("User logged in successfully: {}", user.getEmail());
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -96,6 +98,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         String tempPassword = generateTempPassword();
+
         user.setPassword(passwordEncoder.encode(tempPassword));
         user.setPasswordResetRequired(true);
         userRepository.save(user);
@@ -110,13 +113,13 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
-
     @Override
     public ProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         String profilePictureUrl = null;
+
         if (user.getProfilePicture() != null && !user.getProfilePicture().isBlank()) {
             profilePictureUrl = "/profile/picture";
         }
@@ -130,7 +133,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, Object> updateProfile(String email, String firstName, String lastName, MultipartFile profilePicture) {
+    public Map<String, Object> updateProfile(String email,
+                                             String firstName,
+                                             String lastName,
+                                             MultipartFile profilePicture,
+                                             Boolean removeProfilePicture) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
@@ -147,8 +154,17 @@ public class AuthServiceImpl implements AuthService {
             user.setLastName(lastName);
         }
 
+        File directory = null;
+
+        if (Boolean.TRUE.equals(removeProfilePicture)) {
+            directory = getUploadDirectory();
+            deleteProfilePictureFile(directory, user.getProfilePicture());
+            user.setProfilePicture(null);
+        }
+
         if (profilePicture != null && !profilePicture.isEmpty()) {
             String contentType = profilePicture.getContentType();
+
             if (contentType == null ||
                     !(contentType.equals("image/jpeg") ||
                             contentType.equals("image/png") ||
@@ -160,7 +176,10 @@ public class AuthServiceImpl implements AuthService {
                 throw new BadRequestException("File size must be 5MB or less");
             }
 
-            File directory = new File(uploadDir);
+            if (directory == null) {
+                directory = getUploadDirectory();
+            }
+
             if (!directory.exists() && !directory.mkdirs()) {
                 throw new BadRequestException("Could not create upload directory");
             }
@@ -186,12 +205,7 @@ public class AuthServiceImpl implements AuthService {
 
             user.setProfilePicture(fileName);
 
-            if (oldProfilePicture != null && !oldProfilePicture.isBlank()) {
-                File oldFile = new File(directory, oldProfilePicture);
-                if (oldFile.exists()) {
-                    oldFile.delete();
-                }
-            }
+            deleteProfilePictureFile(directory, oldProfilePicture);
         }
 
         userRepository.save(user);
@@ -199,7 +213,13 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Profile updated successfully");
         response.put("email", user.getEmail());
-        response.put("profilePictureUrl", "/profile/picture");
+        response.put(
+                "profilePictureUrl",
+                user.getProfilePicture() != null && !user.getProfilePicture().isBlank()
+                        ? "/profile/picture"
+                        : null
+        );
+
         return response;
     }
 
@@ -222,7 +242,9 @@ public class AuthServiceImpl implements AuthService {
             byte[] imageBytes = Files.readAllBytes(file.toPath());
 
             String fileName = user.getProfilePicture().toLowerCase();
-            MediaType mediaType = fileName.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
+            MediaType mediaType = fileName.endsWith(".png")
+                    ? MediaType.IMAGE_PNG
+                    : MediaType.IMAGE_JPEG;
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, mediaType.toString())
@@ -231,18 +253,6 @@ public class AuthServiceImpl implements AuthService {
         } catch (IOException e) {
             throw new BadRequestException("Failed to read profile picture");
         }
-    }
-
-    private String generateTempPassword() {
-        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-        SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < 8; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-
-        return sb.toString();
     }
 
     @Override
@@ -268,73 +278,39 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
+    private String generateTempPassword() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+
+        return sb.toString();
+    }
+
     private void validateMaxLength(String fieldValue, String fieldName) {
         if (fieldValue != null && fieldValue.length() > 255) {
             throw new BadRequestException(fieldName + " must be 255 characters or less");
         }
     }
 
-   /* @Override
-    public Map<String, Object> uploadProfilePicture(String email, MultipartFile file) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
-
-        String oldProfilePicture = user.getProfilePicture();
-
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Please upload a file");
+    private File getUploadDirectory() {
+        if (uploadDir == null || uploadDir.isBlank()) {
+            throw new BadRequestException("Upload directory is not configured");
         }
 
-        String contentType = file.getContentType();
-        if (contentType == null ||
-                !(contentType.equals("image/jpeg") ||
-                        contentType.equals("image/png") ||
-                        contentType.equals("image/jpg"))) {
-            throw new BadRequestException("Only JPG, JPEG, and PNG files are allowed");
-        }
+        return new File(uploadDir);
+    }
 
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new BadRequestException("File size must be 5MB or less");
-        }
+    private void deleteProfilePictureFile(File directory, String profilePicture) {
+        if (profilePicture != null && !profilePicture.isBlank()) {
+            File oldFile = new File(directory, profilePicture);
 
-        String originalFilename = file.getOriginalFilename();
-        String extension = "";
-
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-
-        String fileName = UUID.randomUUID() + extension;
-
-        File directory = new File(uploadDir);
-        if (!directory.exists() && !directory.mkdirs()) {
-            throw new BadRequestException("Could not create upload directory");
-        }
-
-        File destination = new File(directory, fileName);
-
-        try {
-            file.transferTo(destination);
-        } catch (IOException e) {
-            log.error("Failed to upload profile picture for email: {}", email, e);
-            throw new BadRequestException("Failed to upload profile picture: " + e.getMessage());
-        }
-
-        // delete old profile picture if it exists
-        if (oldProfilePicture != null && !oldProfilePicture.isBlank()) {
-            File oldFile = new File(oldProfilePicture);
-            if (oldFile.exists()) {
-                oldFile.delete();
+            if (oldFile.exists() && !oldFile.delete()) {
+                log.warn("Failed to delete profile picture file: {}", oldFile.getAbsolutePath());
             }
         }
-
-        user.setProfilePicture(destination.getAbsolutePath());
-        userRepository.save(user);
-
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Profile picture uploaded successfully");
-        response.put("email", user.getEmail());
-        response.put("profilePicture", user.getProfilePicture());
-        return response;
-    } */
+    }
 }
