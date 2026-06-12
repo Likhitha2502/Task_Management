@@ -317,8 +317,9 @@ public class AuthServiceImplTest {
         when(userRepository.findByEmail("test@gmail.com"))
                 .thenReturn(Optional.of(user));
 
-        assertThrows(BadRequestException.class,
-                () -> authService.getProfilePicture("test@gmail.com"));
+        var response = authService.getProfilePicture("test@gmail.com");
+
+        assertEquals(404, response.getStatusCode().value());
     }
 
     @Test
@@ -421,8 +422,9 @@ public class AuthServiceImplTest {
         when(userRepository.findByEmail("test@gmail.com"))
                 .thenReturn(Optional.of(user));
 
-        assertThrows(BadRequestException.class,
-                () -> authService.getProfilePicture("test@gmail.com"));
+        var response = authService.getProfilePicture("test@gmail.com");
+
+        assertEquals(404, response.getStatusCode().value());
     }
 
     @Test

@@ -229,13 +229,13 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         if (user.getProfilePicture() == null || user.getProfilePicture().isBlank()) {
-            throw new BadRequestException("Profile picture not found");
+            return ResponseEntity.notFound().build();
         }
 
         File file = new File(uploadDir, user.getProfilePicture());
 
         if (!file.exists()) {
-            throw new BadRequestException("Profile picture file not found");
+            return ResponseEntity.notFound().build();
         }
 
         try {
