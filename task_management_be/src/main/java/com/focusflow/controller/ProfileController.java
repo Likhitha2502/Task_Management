@@ -31,9 +31,10 @@ public class ProfileController {
     public Map<String, Object> updateProfile(Authentication authentication,
                                              @RequestParam(required = false) String firstName,
                                              @RequestParam(required = false) String lastName,
-                                             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
+                                             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+                                             @RequestParam(value = "removeProfilePicture", required = false, defaultValue = "false") Boolean removeProfilePicture) {
         String email = authentication.getName();
-        return authService.updateProfile(email, firstName, lastName, profilePicture);
+        return authService.updateProfile(email, firstName, lastName, profilePicture, removeProfilePicture);
     }
 
     @GetMapping("/picture")

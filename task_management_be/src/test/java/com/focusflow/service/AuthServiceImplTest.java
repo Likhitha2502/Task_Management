@@ -241,7 +241,8 @@ public class AuthServiceImplTest {
                 "test@gmail.com",
                 "NewFirst",
                 "NewLast",
-                null
+                null,
+                false
         );
 
         assertEquals("NewFirst", user.getFirstName());
@@ -264,7 +265,8 @@ public class AuthServiceImplTest {
                         "missing@gmail.com",
                         "Test",
                         "User",
-                        null
+                        null,
+                        false
                 ));
     }
 
@@ -290,7 +292,8 @@ public class AuthServiceImplTest {
                         "test@gmail.com",
                         "Test",
                         "User",
-                        file
+                        file,
+                        false
                 ));
     }
 
@@ -360,7 +363,8 @@ public class AuthServiceImplTest {
                         "test@gmail.com",
                         "Test",
                         "User",
-                        file
+                        file,
+                        false
                 ));
     }
 
@@ -391,7 +395,8 @@ public class AuthServiceImplTest {
                 "test@gmail.com",
                 "Test",
                 "User",
-                file
+                file,
+                false
         );
 
         assertEquals("Profile updated successfully",
