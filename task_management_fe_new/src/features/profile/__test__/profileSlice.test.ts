@@ -333,7 +333,21 @@ describe('updateUserProfileEpic', () => {
     expect(actions[1]).toEqual(profileSliceActions.fetchUserProfileRequest());
   });
 
-  it('appends File to FormData when profileFile.get() returns a File', async () => {
+  it('sends removeProfilePicture=false and no profilePicture when file is undefined (keep existing)', async () => {
+    mockedProfileFile.get.mockReturnValue(undefined);
+    mockedHttp.put.mockResolvedValueOnce({ data: mockUser });
+
+    await runEpic(
+      profileEpics,
+      profileSliceActions.updateUserProfileRequest({ values: mockProfilePayload })
+    );
+
+    const formDataArg = mockedHttp.put.mock.calls[0][1] as FormData;
+    expect(formDataArg.get('removeProfilePicture')).toBe('false');
+    expect(formDataArg.get('profilePicture')).toBeNull();
+  });
+
+  it('sends removeProfilePicture=false and profilePicture file when file is a File (upload)', async () => {
     const mockFile = new File(['content'], 'avatar.jpg', { type: 'image/jpeg' });
     mockedProfileFile.get.mockReturnValue(mockFile);
     mockedHttp.put.mockResolvedValueOnce({ data: mockUser });
@@ -344,7 +358,22 @@ describe('updateUserProfileEpic', () => {
     );
 
     const formDataArg = mockedHttp.put.mock.calls[0][1] as FormData;
+    expect(formDataArg.get('removeProfilePicture')).toBe('false');
     expect(formDataArg.get('profilePicture')).toEqual(mockFile);
+  });
+
+  it('sends removeProfilePicture=true and no profilePicture when file is null (remove)', async () => {
+    mockedProfileFile.get.mockReturnValue(null);
+    mockedHttp.put.mockResolvedValueOnce({ data: mockUser });
+
+    await runEpic(
+      profileEpics,
+      profileSliceActions.updateUserProfileRequest({ values: mockProfilePayload })
+    );
+
+    const formDataArg = mockedHttp.put.mock.calls[0][1] as FormData;
+    expect(formDataArg.get('removeProfilePicture')).toBe('true');
+    expect(formDataArg.get('profilePicture')).toBeNull();
   });
 
   it('dispatches updateUserProfileFailure on API error', async () => {

@@ -155,10 +155,10 @@ const updateUserProfileEpic: Epic = (action$) =>
       formData.append('lastName', payload.values.lastName);
 
       const file = profileFile.get();
+      const removing = file === null;
+      formData.append('removeProfilePicture', String(removing));
       if (file instanceof File) {
-        formData.append('profilePicture', file, file.name); // ← raw File, BE gets proper binary
-      } else if (file === null) {
-        formData.append('profilePicture', '');              // ← signal deletion
+        formData.append('profilePicture', file, file.name);
       }
 
       profileFile.clear();
